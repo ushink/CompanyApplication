@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">移动监控</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+
+    <string name="action_system">系统配置</string>
+    <string name="systemlayout_textView_system_tv">参数</string>
+    <string name="systemlayout_button_saveparam">保存参数</string>
+    <string name="systemlayout_button_paramdefault">默认参数</string>
+    <string name="indicatorlayout_tv_indicator">天线参数</string>
+    <string name="tab1_layout_textView34">电源管理</string>
+    <string name="tab1_layout_textView5">平台选择</string>
+    <string name="tab1_layout_textView35">连接读写器</string>
+    <string name="tab1_layout_textView36">地址</string>
+    <string name="tab1_layout_textView2">天线口</string>
+    <string name="tab1_layout_button_connect">连接</string>
+    <string name="tab1_layout_button_disconnect">断开</string>
+    <string name="tab2_layout_button_start">开始</string>
+    <string name="tab2_layout_button_stop">停止</string>
+    <string name="tab2_layout_button_readclear">清除</string>
+    <string name="tab2_layout_textView1">本次读到标签个数：</string>
+    <string name="tab2_layout_textView2">        共读到标签个数：</string>
+    <string name="tab2_layout_textView3">设备状态：</string>
+</resources>
