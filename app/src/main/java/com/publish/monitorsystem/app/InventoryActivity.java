@@ -151,24 +151,26 @@ public class InventoryActivity extends BaseActivity {
 									soundPool.play(1, 0.8f, 0.2f, 0, 0, 1);
 									Devaddrs.put(planID + tag, tfs);
 									Eqpt eqptByEPC = eqptDao.getEqptByEPC(tag);
-									inventoryEqptDao.updateInventoryEqpt(eqptByEPC.EquipmentID, planID);
+									if(eqptByEPC != null){
+										inventoryEqptDao.updateInventoryEqpt(eqptByEPC.EquipmentID, planID);
 
-									// 保存盘点设备信息
-									Date date = new Date();// 创建一个时间对象，获取到当前的时间
-									SimpleDateFormat sdf = new SimpleDateFormat(
-											"yyyy/MM/dd HH:mm");// 设置时间显示格式
-									String str = sdf.format(date);// 将当前时间格式化为需要的类型
-									if(inventoryEqptDao.isInventoryEqptID(eqptByEPC.EquipmentID,planID)
-											&&!uploadInventoryeqptDao.containsEqptID(eqptByEPC.EquipmentID)){
-										UploadInventoryEqpt eqpt = new UploadInventoryEqpt();
-										eqpt.InfoID = UUID.randomUUID().toString();
-										eqpt.RoomID = roomID;
-										eqpt.PlanID = planID;
-										eqpt.InventoryID = uploadInventoryDao.getAllUploadInventory().get(0).InventoryID;
-										eqpt.ParentPlanID = inventoryEqptDao.getParentPlanID(planID);
-										eqpt.EquipmentID = eqptByEPC.EquipmentID;
-										eqpt.InventoryTime = str;
-										uploadInventoryeqptDao.addUploadInventoryEqpt(eqpt);
+										// 保存盘点设备信息
+										Date date = new Date();// 创建一个时间对象，获取到当前的时间
+										SimpleDateFormat sdf = new SimpleDateFormat(
+												"yyyy/MM/dd HH:mm");// 设置时间显示格式
+										String str = sdf.format(date);// 将当前时间格式化为需要的类型
+										if(inventoryEqptDao.isInventoryEqptID(eqptByEPC.EquipmentID,planID)
+												&&!uploadInventoryeqptDao.containsEqptID(eqptByEPC.EquipmentID)){
+											UploadInventoryEqpt eqpt = new UploadInventoryEqpt();
+											eqpt.InfoID = UUID.randomUUID().toString();
+											eqpt.RoomID = roomID;
+											eqpt.PlanID = planID;
+											eqpt.InventoryID = uploadInventoryDao.getAllUploadInventory().get(0).InventoryID;
+											eqpt.ParentPlanID = inventoryEqptDao.getParentPlanID(planID);
+											eqpt.EquipmentID = eqptByEPC.EquipmentID;
+											eqpt.InventoryTime = str;
+											uploadInventoryeqptDao.addUploadInventoryEqpt(eqpt);
+										}
 									}
 								}
 							}
@@ -246,11 +248,11 @@ public class InventoryActivity extends BaseActivity {
 						vh = (ViewHolder) view.getTag();
 					}
 					Eqpt eqpt = inventoryEqptlist.get(position);
-					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：" + eqpt.EquipmentCode));
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
 					vh.tv_equipmentName
-							.setText(MyUtils.ToDBC("资产名称：" + eqpt.EquipmentName));
-					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
-					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：" + eqpt.DepartmentName));
+							.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
+					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：\n" + eqpt.EquipmentPosition));
+					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：\n" + eqpt.DepartmentName));
 					if ((position + 1) > inventoryEqptlist.size()
 							- yesInventoryEqptlist.size()) {
 						vh.tv_equipmentCode.setTextColor(Color.BLACK);
@@ -277,13 +279,44 @@ public class InventoryActivity extends BaseActivity {
 						vh = (ViewHolder1) view.getTag();
 					}
 					Eqpt eqpt = inventoryEqptlist.get(position);
-					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：" + eqpt.EquipmentCode));
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
 					vh.tv_equipmentName
-							.setText(MyUtils.ToDBC("资产名称：" + eqpt.EquipmentName));
-					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
-					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：" + eqpt.DepartmentName));
+							.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
+					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：\n" + eqpt.EquipmentPosition));
+					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：\n" + eqpt.DepartmentName));
 					vh.iv.setVisibility(View.VISIBLE);
 					imageLoader.displayImage("file://" + FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,vh.iv);
+					if ((position + 1) > inventoryEqptlist.size()
+							- yesInventoryEqptlist.size()) {
+						vh.tv_equipmentCode.setTextColor(Color.BLACK);
+						vh.tv_equipmentName.setTextColor(Color.BLACK);
+						vh.tv_equipmentPosition.setTextColor(Color.BLACK);
+						vh.tv_departmentName.setTextColor(Color.BLACK);
+						convertView.setClickable(false);
+					}else{
+						vh.tv_equipmentCode.setTextColor(Color.RED);
+						vh.tv_equipmentName.setTextColor(Color.RED);
+						vh.tv_equipmentPosition.setTextColor(Color.RED);
+						vh.tv_departmentName.setTextColor(Color.RED);
+					}
+				}else if("3".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+					ViewHolder1 vh;
+					if (convertView == null) {
+						view = getLayoutInflater()
+								.inflate(R.layout.listitemview_inven,
+										parent, false);
+						vh = new ViewHolder1(view);
+						view.setTag(vh);
+					} else {
+						view = convertView;
+						vh = (ViewHolder1) view.getTag();
+					}
+					Eqpt eqpt = inventoryEqptlist.get(position);
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
+					vh.tv_equipmentName
+							.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
+					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：\n" + eqpt.EquipmentPosition));
+					vh.tv_departmentName.setText(MyUtils.ToDBC("档号：\n" + eqpt.FileCode));
 					if ((position + 1) > inventoryEqptlist.size()
 							- yesInventoryEqptlist.size()) {
 						vh.tv_equipmentCode.setTextColor(Color.BLACK);
@@ -303,29 +336,30 @@ public class InventoryActivity extends BaseActivity {
 		};
 		listView.setAdapter(adapter);
 		listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, true, true)); // 设置滚动时不加载图片
-		if (btnStart.isEnabled()) {
 			listView.setOnItemClickListener(new OnItemClickListener() {
 
 				@Override
 				public void onItemClick(AdapterView<?> arg0, View arg1,
 						int arg2, long arg3) {
-					if ((arg2 + 1) < inventoryEqptlist.size()
-							- yesInventoryEqptlist.size()
-							|| (arg2 + 1) == inventoryEqptlist.size()
-									- yesInventoryEqptlist.size()) {
-						Eqpt eqpt = inventoryEqptlist.get(arg2);
-						Intent intent = new Intent(InventoryActivity.this,
-								InventoryhandActivity.class);
-						intent.putExtra("eqpt", eqpt);
-						intent.putExtra("planID", planID);
-						intent.putExtra("roomID", roomID);
-						startActivity(intent);
-						overridePendingTransition(R.anim.base_slide_right_in,
-								R.anim.base_slide_remain);
+
+					if(!btnStop.isEnabled()){
+						if ((arg2 + 1) < inventoryEqptlist.size()
+								- yesInventoryEqptlist.size()
+								|| (arg2 + 1) == inventoryEqptlist.size()
+								- yesInventoryEqptlist.size()) {
+							Eqpt eqpt = inventoryEqptlist.get(arg2);
+							Intent intent = new Intent(InventoryActivity.this,
+									InventoryhandActivity.class);
+							intent.putExtra("eqpt", eqpt);
+							intent.putExtra("planID", planID);
+							intent.putExtra("roomID", roomID);
+							startActivity(intent);
+							overridePendingTransition(R.anim.base_slide_right_in,
+									R.anim.base_slide_remain);
+						}
 					}
 				}
 			});
-		}
 	}
 
 	static class ViewHolder {
@@ -364,6 +398,7 @@ public class InventoryActivity extends BaseActivity {
 		this.btnStart.setEnabled(false);
 		this.btnStop.setEnabled(true);
 	}
+
 
 	private void StopHandleUI() {
 		this.btnStart.setEnabled(true);

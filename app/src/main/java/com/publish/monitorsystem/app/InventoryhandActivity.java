@@ -75,6 +75,8 @@ public class InventoryhandActivity extends BaseActivity{
 	TextView tv_eqpt_UsePerson;
 	@InjectView(R.id.tv_eqpt_IsSecret)
 	TextView tv_eqpt_IsSecret;
+	@InjectView(R.id.tv_desc_departmentName)
+	TextView tv_desc_departmentName;
 
 	@InjectView(R.id.ll_eqpt_InitialValue)
 	LinearLayout ll_eqpt_InitialValue;
@@ -88,6 +90,8 @@ public class InventoryhandActivity extends BaseActivity{
 	LinearLayout ll_eqpt_type;
 	@InjectView(R.id.ll_eqpt_IsSecret)
 	LinearLayout ll_eqpt_IsSecret;
+	@InjectView(R.id.ll_eqpt_uesPerson)
+	LinearLayout ll_eqpt_uesPerson;
 	@InjectView(R.id.iv)
 	ImageView iv;
 	
@@ -124,6 +128,15 @@ public class InventoryhandActivity extends BaseActivity{
 			ll_eqpt_ProjectName.setVisibility(View.GONE);
 			ll_eqpt_ManagePerson.setVisibility(View.GONE);
 			ll_eqpt_IsSecret.setVisibility(View.GONE);
+		}else if("3".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			ll_eqpt_type.setVisibility(View.GONE);
+			ll_eqpt_OutFactoryNum.setVisibility(View.GONE);
+			ll_eqpt_InitialValue.setVisibility(View.GONE);
+			ll_eqpt_ProjectName.setVisibility(View.GONE);
+			ll_eqpt_ManagePerson.setVisibility(View.GONE);
+			ll_eqpt_IsSecret.setVisibility(View.GONE);
+			ll_eqpt_uesPerson.setVisibility(View.GONE);
+			tv_desc_departmentName.setText("档号：");
 		}
 	}
 
@@ -163,6 +176,11 @@ public class InventoryhandActivity extends BaseActivity{
 			tv_eqpt_EquipmentPosition.setText(eqpt.EquipmentPosition);
 			tv_eqpt_DepartmentName.setText(eqpt.DepartmentName);
 			tv_eqpt_UsePerson.setText(eqpt.UsePerson);
+		}else if("3".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			tv_eqpt_code.setText(eqpt.EquipmentCode);
+			tv_eqpt_name.setText(eqpt.EquipmentName);
+			tv_eqpt_EquipmentPosition.setText(eqpt.EquipmentPosition);
+			tv_eqpt_DepartmentName.setText(eqpt.FileCode);
 		}
 
 		
@@ -212,23 +230,25 @@ public class InventoryhandActivity extends BaseActivity{
 									tv_readstatue.setText("已读取到");
 									tv_readstatue.setTextColor(Color.BLACK);
 									Eqpt eqptByEPC = eqptDao.getEqptByEPC(tag);
-									inventoryEqptDao.updateInventoryEqpt(eqptByEPC.EquipmentID,planID);
-									
-									// 保存盘点设备信息
-									Date date = new Date();// 创建一个时间对象，获取到当前的时间
-									SimpleDateFormat sdf = new SimpleDateFormat(
-											"yyyy/MM/dd HH:mm");// 设置时间显示格式
-									String str = sdf.format(date);// 将当前时间格式化为需要的类型
-									if(inventoryEqptDao.isInventoryEqptID(eqptByEPC.EquipmentID,planID)){
-										UploadInventoryEqpt eqpt = new UploadInventoryEqpt();
-										eqpt.InfoID = UUID.randomUUID().toString();
-										eqpt.RoomID = roomID;
-										eqpt.PlanID = planID;
-										eqpt.InventoryID = uploadInventoryDao.getAllUploadInventory().get(0).InventoryID;
-										eqpt.ParentPlanID = inventoryEqptDao.getParentPlanID(planID);
-										eqpt.EquipmentID = eqptByEPC.EquipmentID;
-										eqpt.InventoryTime = str;
-										uploadInventoryeqptDao.addUploadInventoryEqpt(eqpt);
+									if(eqptByEPC != null) {
+										inventoryEqptDao.updateInventoryEqpt(eqptByEPC.EquipmentID, planID);
+
+										// 保存盘点设备信息
+										Date date = new Date();// 创建一个时间对象，获取到当前的时间
+										SimpleDateFormat sdf = new SimpleDateFormat(
+												"yyyy/MM/dd HH:mm");// 设置时间显示格式
+										String str = sdf.format(date);// 将当前时间格式化为需要的类型
+										if (inventoryEqptDao.isInventoryEqptID(eqptByEPC.EquipmentID, planID)) {
+											UploadInventoryEqpt eqpt = new UploadInventoryEqpt();
+											eqpt.InfoID = UUID.randomUUID().toString();
+											eqpt.RoomID = roomID;
+											eqpt.PlanID = planID;
+											eqpt.InventoryID = uploadInventoryDao.getAllUploadInventory().get(0).InventoryID;
+											eqpt.ParentPlanID = inventoryEqptDao.getParentPlanID(planID);
+											eqpt.EquipmentID = eqptByEPC.EquipmentID;
+											eqpt.InventoryTime = str;
+											uploadInventoryeqptDao.addUploadInventoryEqpt(eqpt);
+										}
 									}
 								}
 								Devaddrs.put(tag,tfs);

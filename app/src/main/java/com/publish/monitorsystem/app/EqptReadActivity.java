@@ -160,7 +160,7 @@ public class EqptReadActivity extends BaseActivity {
 
 							@Override
 							public void setReadNum() {
-								tv_tags.setText(String.valueOf(listView.getCount() - 1));
+								tv_tags.setText(String.valueOf(listView.getCount()));
 								handler.postDelayed(runnable, myapp.Rparams.sleep);
 							}
 						});
@@ -215,10 +215,12 @@ public class EqptReadActivity extends BaseActivity {
 				epcstr = String.format("%-24s", epcstr);
 			Eqpt eqpt = eqptDao.getEqptByEPC(epcstr);
 			if(eqpt != null){
-				eqptList.add(eqpt);
+				if(!eqptList.contains(eqpt)){
+					eqptList.add(eqpt);
+				}
 			}
 		}
-		MyUtils.removeDuplicate(eqptList);
+//		MyUtils.removeDuplicate(eqptList);
 		if ("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim())) {
 			//typeId为1时为设备系统
 			if(adapter != null){
@@ -240,19 +242,19 @@ public class EqptReadActivity extends BaseActivity {
 							vh = (ViewHolder) view.getTag();
 						}
 						Eqpt eqpt = eqptList.get(position);
-						vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：" + eqpt.EquipmentCode));
+						vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
 						vh.tv_equipmentName
-								.setText(MyUtils.ToDBC("资产名称：" + eqpt.EquipmentName));
-						vh.tv_specification.setText(MyUtils.ToDBC("型号：" + eqpt.Specification));
-						vh.tv_outFactoryNum.setText(MyUtils.ToDBC("出厂编号：" + eqpt.OutFactoryNum));
-						vh.tv_initialValue.setText(MyUtils.ToDBC("资产原值：" + eqpt.InitialValue));
+								.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
+						vh.tv_specification.setText(MyUtils.ToDBC("型号：\n" + eqpt.Specification));
+						vh.tv_outFactoryNum.setText(MyUtils.ToDBC("出厂编号：\n" + eqpt.OutFactoryNum));
+						vh.tv_initialValue.setText(MyUtils.ToDBC("资产原值：\n" + eqpt.InitialValue));
 						vh.tv_projectName.setText(MyUtils.ToDBC("资产属性：" + eqpt.ProjectName));
-						vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
-						vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：" + eqpt.DepartmentName));
-						vh.tv_managePerson.setText(MyUtils.ToDBC("责任人：" + eqpt.ManagePerson));
-						vh.tv_usePerson.setText(MyUtils.ToDBC("使用人：" + eqpt.UsePerson));
+						vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：\n" + eqpt.EquipmentPosition));
+						vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：\n" + eqpt.DepartmentName));
+						vh.tv_managePerson.setText(MyUtils.ToDBC("责任人：\n" + eqpt.ManagePerson));
+						vh.tv_usePerson.setText(MyUtils.ToDBC("使用人：\n" + eqpt.UsePerson));
 						if (null != eqpt.IsSecret && !"".equals(eqpt.IsSecret)) {
-							vh.tv_isSecret.setText(MyUtils.ToDBC("保密等级：" + ((Integer.parseInt(eqpt.IsSecret) == 0) ? "非涉密" : "涉密")));
+							vh.tv_isSecret.setText(MyUtils.ToDBC("保密等级：\n" + ((Integer.parseInt(eqpt.IsSecret) == 0) ? "非涉密" : "涉密")));
 						}else{
 							vh.tv_isSecret.setText("保密等级：");
 						}
@@ -279,18 +281,49 @@ public class EqptReadActivity extends BaseActivity {
 						vh = (ViewHolder1) view.getTag();
 					}
 					Eqpt eqpt = eqptList.get(position);
-					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：" + eqpt.EquipmentCode));
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
 					vh.tv_equipmentName
-							.setText(MyUtils.ToDBC("资产名称：" + eqpt.EquipmentName));
+							.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
 					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
-					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：" + eqpt.DepartmentName));
-					vh.tv_usePerson.setText(MyUtils.ToDBC("使用人：" + eqpt.UsePerson));
+					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：\n" + eqpt.DepartmentName));
+					vh.tv_usePerson.setText(MyUtils.ToDBC("使用人：\n" + eqpt.UsePerson));
 					imageLoader.displayImage("file://" +FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,vh.iv);
 					return view;
 				}
 			};
 			listView.setAdapter(adapter);
 			listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, true, true)); // 设置滚动时不加载图片
+		}else if("3".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			//typeId为3时为档案系统
+			adapter =  new CommonAdapter<Eqpt>(eqptList) {
+				@Override
+				public View getView (int position, View convertView, ViewGroup parent) {
+					View view;
+					ViewHolder1 vh;
+					if (convertView == null) {
+						view = getLayoutInflater()
+								.inflate(R.layout.listitemview_inv_1,
+										parent, false);
+						vh = new ViewHolder1(view);
+						view.setTag(vh);
+					} else {
+						view = convertView;
+						vh = (ViewHolder1) view.getTag();
+					}
+					Eqpt eqpt = eqptList.get(position);
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
+					vh.tv_equipmentName
+							.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
+					vh.tv_departmentName.setText(MyUtils.ToDBC("物理位置：\n" + eqpt.EquipmentPosition));
+					vh.tv_usePerson.setText(MyUtils.ToDBC("档号：\n" + eqpt.FileCode));
+					vh.tv_equipmentPosition.setVisibility(View.GONE);
+					vh.iv.setVisibility(View.GONE);
+					vh.iv_line.setVisibility(View.GONE);
+					vh.iv_line1.setVisibility(View.GONE);
+					return view;
+				}
+			};
+			listView.setAdapter(adapter);
 		}
 	}
 
@@ -338,6 +371,10 @@ public class EqptReadActivity extends BaseActivity {
 		TextView tv_usePerson;
 		@InjectView(R.id.iv)
 		ImageView iv;
+		@InjectView(R.id.iv_line1)
+		ImageView iv_line1;
+		@InjectView(R.id.iv_line)
+		ImageView iv_line;
 
 		public ViewHolder1(View view) {
 			ButterKnife.inject(this, view);

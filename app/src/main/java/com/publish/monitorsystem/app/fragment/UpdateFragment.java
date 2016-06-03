@@ -313,7 +313,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 										properties.put("PageIndex", pageIndexeqpt + "");
 										getData(Const.GETEQUIPMENTTAGINFO);
 									}else{
-										ToastUtils.showToast(getActivity(), "没有设备信息");
+										if("1".equals(typeID)){
+											ToastUtils.showToast(getActivity(), "没有设备信息");
+										}else if("2".equals(typeID)){
+											ToastUtils.showToast(getActivity(), "没有营具信息");
+										}else if("3".equals(typeID)){
+											ToastUtils.showToast(getActivity(), "没有档案信息");
+										}
 										downloadDialog.dismiss();
 									}
 								}
@@ -769,13 +775,24 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 				ThreadUtils.runInMainThread(new Runnable() {
 					@Override
 					public void run() {
-						AlertUtils.dialog1(getActivity(), "提示", "设备同步成功！", new DialogInterface.OnClickListener() {
+						if("1".equals(typeID)){
+							AlertUtils.dialog1(getActivity(), "提示", "设备同步成功！", new DialogInterface.OnClickListener() {
 
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								dialog.dismiss();
-							}
-						}, null);
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									dialog.dismiss();
+								}
+							}, null);
+						}else if("3".equals(typeID)){
+							AlertUtils.dialog1(getActivity(), "提示", "档案同步成功！", new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									dialog.dismiss();
+								}
+							}, null);
+						}
+
 					}
 				});
 

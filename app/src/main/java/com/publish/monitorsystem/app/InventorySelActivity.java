@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import butterknife.ButterKnife;
@@ -20,6 +21,7 @@ import com.msystemlib.base.BaseActivity;
 import com.msystemlib.utils.SPUtils;
 import com.msystemlib.utils.ThreadUtils;
 import com.publish.monitorsystem.R;
+import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.BuildingBean.Building;
 import com.publish.monitorsystem.api.bean.InventoryBean.Inventory;
 import com.publish.monitorsystem.api.bean.RoomBean.Room;
@@ -37,6 +39,8 @@ public class InventorySelActivity extends BaseActivity {
 	Spinner spinner_inventorys;
 	@InjectView(R.id.spinner_rooms)
 	Spinner spinner_rooms;
+	@InjectView(R.id.ll_rooms)
+	LinearLayout ll_rooms;
 	@InjectView(R.id.spinner_buildings)
 	Spinner spinner_buildings;
 	@InjectView(R.id.btn_inventory)
@@ -71,24 +75,31 @@ public class InventorySelActivity extends BaseActivity {
 		adapter_inventorys = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,inventorys); 
 		adapter_inventorys.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);    
 		spinner_inventorys.setAdapter(adapter_inventorys);
-		adapter_buildings = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,Buildings); 
-		adapter_buildings.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);    
+		adapter_buildings = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,Buildings);
+		adapter_buildings.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner_buildings.setAdapter(adapter_buildings);
-		adapter_rooms = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,rooms); 
-		adapter_rooms.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);    
-		spinner_rooms.setAdapter(adapter_rooms);
+		if("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim()) || "2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			adapter_rooms = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,rooms);
+			adapter_rooms.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			spinner_rooms.setAdapter(adapter_rooms);
+		}else{
+			ll_rooms.setVisibility(View.GONE);
+		}
+
 		btn_inventory.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				int inventoryPosition = spinner_inventorys.getSelectedItemPosition();
-//				int buildingPosition = spinner_buildings.getSelectedItemPosition();
-				int roomPosition = spinner_rooms.getSelectedItemPosition();
+				int buildingPosition = spinner_buildings.getSelectedItemPosition();
 				String planID = inventoryDao.getInventoryPlanID(inventorys[inventoryPosition]);
-				
 				String parentPlanID = inventoryEqptDao.getParentPlanID(planID);
 				SPUtils.saveString(InventorySelActivity.this, "ParentPlanID", parentPlanID);
-				String roomID = roomDao.getRoomID(rooms[roomPosition]);
+				String roomID = "";
+				if("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim()) || "2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+					int roomPosition = spinner_rooms.getSelectedItemPosition();
+					roomID = roomDao.getRoomID(rooms[roomPosition]);
+				}
 				HashMap<String, String> map = new HashMap<String, String>();
 				map.put("planID", planID);
 				map.put("roomID", roomID);
