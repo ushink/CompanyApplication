@@ -88,38 +88,17 @@
                 android:text="......." />
         </LinearLayout>
 
-        <ScrollView
-            android:id="@+id/scrollView1"
+        <ListView
+            android:layout_weight="1"
+            android:id="@+id/lv_eqptread"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:layout_weight="1" >
+            android:divider="#00000000"
+            android:dividerHeight="5dip"
+            android:listSelector="@android:color/transparent"
+             >
+        </ListView>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" >
-
-                <HorizontalScrollView
-                    android:id="@+id/horizontalScrollView1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" >
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal" >
-
-                        <ListView
-                            android:id="@+id/lv_eqptread"
-                            android:layout_width="803dp"
-                            android:layout_height="8000dp"
-                            android:background="#fff0f0" >
-                        </ListView>
-                    </LinearLayout>
-                </HorizontalScrollView>
-            </LinearLayout>
-        </ScrollView>
     </LinearLayout>
 
 </RelativeLayout>

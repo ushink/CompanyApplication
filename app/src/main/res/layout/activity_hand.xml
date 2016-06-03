@@ -56,7 +56,8 @@
                 android:id="@+id/tv_readstatue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="......." />
+                android:textColor="@color/red"
+                android:text="未读取到" />
         </LinearLayout>
 
         <ScrollView
@@ -69,8 +70,22 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <ImageView
+                    android:id="@+id/iv"
+                    android:scaleType="fitXY"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:background="@android:color/transparent"
+                    android:visibility="gone"
+                    />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:background="@color/darkwhite"
                 android:orientation="vertical" >
+
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -119,6 +134,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_eqpt_type"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -142,6 +158,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_eqpt_OutFactoryNum"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -165,6 +182,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_eqpt_InitialValue"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -188,6 +206,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_eqpt_ProjectName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -257,6 +276,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_eqpt_ManagePerson"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -303,6 +323,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_eqpt_IsSecret"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
@@ -324,6 +345,7 @@
                         android:layout_weight="1"
                         android:textSize="14sp" />
                 </LinearLayout>
+            </LinearLayout>
             </LinearLayout>
         </ScrollView>
     </LinearLayout>

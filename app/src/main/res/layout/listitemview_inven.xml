@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+                      android:background="@drawable/item_click"
+            android:padding="5dp"
+            android:orientation="vertical">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/line" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/iv"
+            android:scaleType="fitXY"
+            android:layout_width="80dp"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <View
+            android:layout_width="1px"
+            android:layout_height="fill_parent"
+            android:background="#B8B8B8"
+            android:visibility="visible" />
+        <TextView
+            android:padding="2dp"
+            android:id="@+id/tv_equipmentName"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="资产名称"
+            android:textColor="#000000"
+            android:textSize="15sp" />
+        <View
+            android:layout_width="1px"
+            android:layout_height="fill_parent"
+            android:background="#B8B8B8"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tv_equipmentCode"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:padding="2dp"
+            android:layout_height="wrap_content"
+            android:text="资产编号"
+            android:textColor="#000000"
+            android:textSize="15sp" />
+        <View
+            android:layout_width="1px"
+            android:layout_height="fill_parent"
+            android:background="#B8B8B8"
+            android:visibility="visible" />
+    </LinearLayout>
+
+
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/line" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <View
+            android:layout_width="1px"
+            android:layout_height="fill_parent"
+            android:background="#B8B8B8"
+            android:visibility="visible" />
+        <TextView
+            android:id="@+id/tv_equipmentPosition"
+            android:layout_width="0dp"
+            android:padding="2dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:textSize="15sp"
+            android:text="物理位置" />
+        <View
+            android:layout_width="1px"
+            android:layout_height="fill_parent"
+            android:background="#B8B8B8"
+            android:visibility="visible" />
+        <TextView
+            android:id="@+id/tv_departmentName"
+            android:layout_width="0dp"
+            android:padding="2dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:textSize="15sp"
+            android:text="使用部门" />
+        <View
+            android:layout_width="1px"
+            android:layout_height="fill_parent"
+            android:background="#B8B8B8"
+            android:visibility="visible" />
+    </LinearLayout>
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/line" />
+    </LinearLayout>
+</LinearLayout>
+</LinearLayout>

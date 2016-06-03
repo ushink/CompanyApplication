@@ -1,43 +1,54 @@
 package com.publish.monitorsystem.app;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import android.app.Application;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ListAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 
 import com.msystemlib.base.BaseActivity;
+import com.msystemlib.img.ImgLoad;
+import com.msystemlib.utils.FileUtils;
+import com.msystemlib.utils.LogUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.PauseOnScrollListener;
 import com.pow.api.cls.RfidPower.PDATYPE;
 import com.publish.monitorsystem.R;
+import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.EqptBean.Eqpt;
 import com.publish.monitorsystem.api.db.dao.EqptDao;
 import com.publish.monitorsystem.api.readrfid.IRunneableReaderListener;
 import com.publish.monitorsystem.api.readrfid.ReadRFID;
 import com.publish.monitorsystem.api.readrfid.Runnable_Reader;
+import com.publish.monitorsystem.api.utils.MyUtils;
 import com.publish.monitorsystem.application.SysApplication;
-import com.publish.monitorsystem.view.MyAdapter;
 import com.uhf.api.cls.Reader;
 import com.uhf.api.cls.Reader.READER_ERR;
 import com.uhf.api.cls.Reader.TAGINFO;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
 import static com.publish.monitorsystem.R.layout.activity_eqptread;
 
@@ -61,12 +72,14 @@ public class EqptReadActivity extends BaseActivity {
 	@InjectView(R.id.lv_eqptread)
 	ListView listView;
 
+	private ImageLoader imageLoader;
 	private EqptDao eqptDao;
 	Map<String, TAGINFO> Devaddrs = new LinkedHashMap<String, TAGINFO>();// 有序
 	private SoundPool soundPool;
 	private SysApplication myapp;
 	private Handler handler = new Handler();
 	private ReadRFID readRFID;
+	private CommonAdapter adapter;
 	private Runnable_Reader runnable; 
 	@Override
 	public int bindLayout() {
@@ -81,16 +94,21 @@ public class EqptReadActivity extends BaseActivity {
 
 	@Override
 	public void doBusiness(Context mContext) {
+		//声音池初始化
 		soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
 		soundPool.load(this, R.raw.beep, 1);
+		//变量初始化
 		Application app = getApplication();
 		myapp = (SysApplication) app;
 		runnable = new Runnable_Reader(myapp);
 		readRFID = new ReadRFID(myapp);
 		myapp.Rparams = myapp.new ReaderParams();
+		imageLoader = ImgLoad.initImageLoader(EqptReadActivity.this);
+		//数据处理层初始化
 		eqptDao = EqptDao.getInstance(this);
+
+		//view层初始化
 		btnStop.setEnabled(false);
-		
 		btnStart.setOnClickListener(new OnClickListener() {
 
 			@SuppressWarnings("unused")
@@ -122,6 +140,7 @@ public class EqptReadActivity extends BaseActivity {
 							@Override
 							public void setReaderSound(String tag,TAGINFO tfs) {
 								if (!Devaddrs.containsKey(tag)) {
+									//读到标签响两次
 									soundPool.play(1, 0.2f, 0.8f, 0, 0, 1);
 									SystemClock.sleep(100);
 									soundPool.play(1, 0.8f, 0.2f, 0, 0, 1);
@@ -177,14 +196,11 @@ public class EqptReadActivity extends BaseActivity {
 
 		});
 	}
-
-	String[] Coname = new String[] { "序号", "资产编号", "资产名称", "型号", "出厂编号",
-			"资产原值", "资产属性", "物理位置", "使用部门", "责任人", "使用人", "保密等级" };
+	private List<Eqpt> eqptList = new ArrayList<>();
 	/**
 	 * 显示读取列表
 	 */
 	private void showlist() {
-
 		List<Map<String, ?>> list = new ArrayList<Map<String, ?>>();
 		Iterator<Entry<String, TAGINFO>> iesb;
 		synchronized (this) {
@@ -192,63 +208,152 @@ public class EqptReadActivity extends BaseActivity {
 			Devaddrs2.putAll(Devaddrs);
 			iesb = Devaddrs2.entrySet().iterator();
 		}
-		int j = 1;
-
-		Map<String, String> h = new HashMap<String, String>();
-		for (int i = 0; i < Coname.length; i++)
-			h.put(Coname[i], Coname[i]);
-		list.add(h);
-
 		while (iesb.hasNext()) {
 			TAGINFO bd = iesb.next().getValue();
-			Map<String, String> m = new HashMap<String, String>();
-			m.put(Coname[0], String.valueOf(j));
-			j++;
 			String epcstr = Reader.bytes_Hexstr(bd.EpcId);
 			if (epcstr.length() < 24)
 				epcstr = String.format("%-24s", epcstr);
-
 			Eqpt eqpt = eqptDao.getEqptByEPC(epcstr);
-
-			m.put(Coname[1], eqpt.EquipmentCode);
-			m.put(Coname[2], eqpt.EquipmentName);
-			m.put(Coname[3], eqpt.Specification);
-			m.put(Coname[4], eqpt.OutFactoryNum);
-			m.put(Coname[5], eqpt.InitialValue);
-			m.put(Coname[6], eqpt.ProjectName);
-			m.put(Coname[7], eqpt.EquipmentPosition);
-			m.put(Coname[8], eqpt.DepartmentName);
-			m.put(Coname[9], eqpt.ManagePerson);
-			m.put(Coname[10], eqpt.UsePerson);
-			if (null != eqpt.IsSecret) {
-				m.put(Coname[11],
-						(Integer.parseInt(eqpt.IsSecret) == 0) ? "非涉密" : "涉密");
+			if(eqpt != null){
+				eqptList.add(eqpt);
 			}
-			list.add(m);
 		}
-
-		// /*
-		ListAdapter adapter = new MyAdapter(this, list,
-				R.layout.listitemview_inv, Coname, new int[] {
-						R.id.tv_readsort, R.id.tv_equipmentCode,
-						R.id.tv_equipmentName, R.id.tv_specification,
-						R.id.tv_outFactoryNum, R.id.tv_initialValue,
-						R.id.tv_projectName, R.id.tv_equipmentPosition,
-						R.id.tv_departmentName, R.id.tv_managePerson,
-						R.id.tv_usePerson, R.id.tv_isSecret });
-
-		// layout为listView的布局文件，包括三个TextView，用来显示三个列名所对应的值
-		// ColumnNames为数据库的表的列名
-		// 最后一个参数是int[]类型的，为view类型的id，用来显示ColumnNames列名所对应的值。view的类型为TextView
-		listView.setAdapter(adapter);
-		// */
+		MyUtils.removeDuplicate(eqptList);
+		if ("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim())) {
+			//typeId为1时为设备系统
+			if(adapter != null){
+				adapter.notifyDataSetChanged();
+			}else{
+				adapter =  new CommonAdapter<Eqpt>(eqptList) {
+					@Override
+					public View getView (int position, View convertView, ViewGroup parent) {
+						View view;
+						ViewHolder vh;
+						if (convertView == null) {
+							view = getLayoutInflater()
+									.inflate(R.layout.listitemview_inv,
+											parent, false);
+							vh = new ViewHolder(view);
+							view.setTag(vh);
+						} else {
+							view = convertView;
+							vh = (ViewHolder) view.getTag();
+						}
+						Eqpt eqpt = eqptList.get(position);
+						vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：" + eqpt.EquipmentCode));
+						vh.tv_equipmentName
+								.setText(MyUtils.ToDBC("资产名称：" + eqpt.EquipmentName));
+						vh.tv_specification.setText(MyUtils.ToDBC("型号：" + eqpt.Specification));
+						vh.tv_outFactoryNum.setText(MyUtils.ToDBC("出厂编号：" + eqpt.OutFactoryNum));
+						vh.tv_initialValue.setText(MyUtils.ToDBC("资产原值：" + eqpt.InitialValue));
+						vh.tv_projectName.setText(MyUtils.ToDBC("资产属性：" + eqpt.ProjectName));
+						vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
+						vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：" + eqpt.DepartmentName));
+						vh.tv_managePerson.setText(MyUtils.ToDBC("责任人：" + eqpt.ManagePerson));
+						vh.tv_usePerson.setText(MyUtils.ToDBC("使用人：" + eqpt.UsePerson));
+						if (null != eqpt.IsSecret && !"".equals(eqpt.IsSecret)) {
+							vh.tv_isSecret.setText(MyUtils.ToDBC("保密等级：" + ((Integer.parseInt(eqpt.IsSecret) == 0) ? "非涉密" : "涉密")));
+						}else{
+							vh.tv_isSecret.setText("保密等级：");
+						}
+						return view;
+					}
+				};
+				listView.setAdapter(adapter);
+			}
+		}else if("2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			//typeId为2时为营具系统
+			adapter =  new CommonAdapter<Eqpt>(eqptList) {
+				@Override
+				public View getView (int position, View convertView, ViewGroup parent) {
+					View view;
+					ViewHolder1 vh;
+					if (convertView == null) {
+						view = getLayoutInflater()
+								.inflate(R.layout.listitemview_inv_1,
+										parent, false);
+						vh = new ViewHolder1(view);
+						view.setTag(vh);
+					} else {
+						view = convertView;
+						vh = (ViewHolder1) view.getTag();
+					}
+					Eqpt eqpt = eqptList.get(position);
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：" + eqpt.EquipmentCode));
+					vh.tv_equipmentName
+							.setText(MyUtils.ToDBC("资产名称：" + eqpt.EquipmentName));
+					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
+					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：" + eqpt.DepartmentName));
+					vh.tv_usePerson.setText(MyUtils.ToDBC("使用人：" + eqpt.UsePerson));
+					imageLoader.displayImage("file://" +FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,vh.iv);
+					return view;
+				}
+			};
+			listView.setAdapter(adapter);
+			listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, true, true)); // 设置滚动时不加载图片
+		}
 	}
 
+	static class ViewHolder {
+		@InjectView(R.id.tv_equipmentCode)
+		TextView tv_equipmentCode;
+		@InjectView(R.id.tv_equipmentName)
+		TextView tv_equipmentName;
+		@InjectView(R.id.tv_specification)
+		TextView tv_specification;
+		@InjectView(R.id.tv_outFactoryNum)
+		TextView tv_outFactoryNum;
+		@InjectView(R.id.tv_initialValue)
+		TextView tv_initialValue;
+		@InjectView(R.id.tv_projectName)
+		TextView tv_projectName;
+		@InjectView(R.id.tv_equipmentPosition)
+		TextView tv_equipmentPosition;
+		@InjectView(R.id.tv_departmentName)
+		TextView tv_departmentName;
+		@InjectView(R.id.tv_managePerson)
+		TextView tv_managePerson;
+		@InjectView(R.id.tv_usePerson)
+		TextView tv_usePerson;
+		@InjectView(R.id.tv_isSecret)
+		TextView tv_isSecret;
+
+		public ViewHolder(View view) {
+			ButterKnife.inject(this, view);
+		}
+	}
+
+	static class ViewHolder1 {
+		@InjectView(R.id.tv_equipmentCode)
+		TextView tv_equipmentCode;
+		@InjectView(R.id.tv_equipmentName)
+		TextView tv_equipmentName;
+
+		@InjectView(R.id.tv_equipmentPosition)
+		TextView tv_equipmentPosition;
+		@InjectView(R.id.tv_departmentName)
+		TextView tv_departmentName;
+
+		@InjectView(R.id.tv_usePerson)
+		TextView tv_usePerson;
+		@InjectView(R.id.iv)
+		ImageView iv;
+
+		public ViewHolder1(View view) {
+			ButterKnife.inject(this, view);
+		}
+	}
+
+	/**
+	 * 读取时按钮切换
+	 */
 	private void ReadHandleUI() {
 		this.btnStart.setEnabled(false);
 		this.btnStop.setEnabled(true);
 	}
-
+	/**
+	 * 停止时按钮切换
+	 */
 	private void StopHandleUI() {
 		this.btnStart.setEnabled(true);
 		this.btnStop.setEnabled(false);
@@ -268,6 +373,7 @@ public class EqptReadActivity extends BaseActivity {
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			if (btnStop.isEnabled()) {
+				//不停止不能返回
 				return true;
 			}
 		}

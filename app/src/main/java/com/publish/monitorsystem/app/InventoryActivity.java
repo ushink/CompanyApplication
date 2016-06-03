@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,8 +31,13 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 import com.msystemlib.base.BaseActivity;
+import com.msystemlib.img.ImgLoad;
+import com.msystemlib.utils.FileUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.PauseOnScrollListener;
 import com.pow.api.cls.RfidPower.PDATYPE;
 import com.publish.monitorsystem.R;
+import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.UploadInventoryEqpt;
 import com.publish.monitorsystem.api.bean.EqptBean.Eqpt;
 import com.publish.monitorsystem.api.db.dao.EqptDao;
@@ -40,6 +46,8 @@ import com.publish.monitorsystem.api.db.dao.UploadInventoryDao;
 import com.publish.monitorsystem.api.db.dao.UploadInventoryEqptDao;
 import com.publish.monitorsystem.api.readrfid.IRunneableReaderListener;
 import com.publish.monitorsystem.api.readrfid.Runnable_Reader;
+import com.publish.monitorsystem.api.utils.DensityUtil;
+import com.publish.monitorsystem.api.utils.MyUtils;
 import com.publish.monitorsystem.application.SysApplication;
 import com.uhf.api.cls.Reader.READER_ERR;
 import com.uhf.api.cls.Reader.TAGINFO;
@@ -62,10 +70,12 @@ public class InventoryActivity extends BaseActivity {
 	private List<Eqpt> noInventoryEqptlist;
 	private List<Eqpt> yesInventoryEqptlist;
 	private ArrayList<Eqpt> inventoryEqptlist;
+
 	Map<String, TAGINFO> Devaddrs = new LinkedHashMap<String, TAGINFO>();// 有序
 	private SoundPool soundPool;
 	private SysApplication myapp;
 	private Runnable_Reader runnable;
+	private ImageLoader imageLoader;
 	private String planID;
 	private String roomID;
 	private Handler handler = new Handler();
@@ -87,19 +97,23 @@ public class InventoryActivity extends BaseActivity {
 		Intent intent = getIntent();
 		planID = intent.getStringExtra("planID");
 		roomID = intent.getStringExtra("roomID");
-		
+
+		//数据处理层初始化
 		inventoryEqptDao = InventoryEqptDao.getInstance(this);
 		uploadInventoryDao = UploadInventoryDao.getInstance(this);
 		eqptDao = EqptDao.getInstance(this);
 		uploadInventoryeqptDao = UploadInventoryEqptDao.getInstance(this);
-		frushAdapter();
 
+		//变量初始化
+		imageLoader = ImgLoad.initImageLoader(InventoryActivity.this);
 		soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
 		soundPool.load(this, R.raw.beep, 1);
 		Application app = getApplication();
 		myapp = (SysApplication) app;
 		runnable = new Runnable_Reader(myapp);
 		myapp.Rparams = myapp.new ReaderParams();
+		//view层初始化
+		frushAdapter();
 		btnStop.setEnabled(false);
 		btnStart.setOnClickListener(new OnClickListener() {
 
@@ -131,6 +145,7 @@ public class InventoryActivity extends BaseActivity {
 							public void setReaderSound(String tag, TAGINFO tfs) {
 								if (!myapp.Devaddrs.containsKey(planID + tag)
 										&& !Devaddrs.containsKey(planID+ tag)) {
+									//读取到标签响两声
 									soundPool.play(1, 0.2f, 0.8f, 0, 0, 1);
 									SystemClock.sleep(100);
 									soundPool.play(1, 0.8f, 0.2f, 0, 0, 1);
@@ -202,6 +217,9 @@ public class InventoryActivity extends BaseActivity {
 		});
 	}
 
+	/**
+	 * listView刷新
+	 */
 	private void frushAdapter() {
 		noInventoryEqptlist = inventoryEqptDao.getInventoryEqptList(0 + "",
 				planID);
@@ -213,21 +231,78 @@ public class InventoryActivity extends BaseActivity {
 		adapter = new CommonAdapter<Eqpt>(inventoryEqptlist) {
 
 			@Override
-			public View getView(int arg0, View arg1, ViewGroup arg2) {
-				TextView tv = new TextView(InventoryActivity.this);
-				String string = inventoryEqptlist.get(arg0).EquipmentCode
-						+ "\t\t" + inventoryEqptlist.get(arg0).EquipmentName;
-				tv.setText(string);
-				tv.setTextColor(Color.RED);
-				if ((arg0 + 1) > inventoryEqptlist.size()
-						- yesInventoryEqptlist.size()) {
-					tv.setTextColor(Color.BLACK);
-					arg1.setClickable(false);
+			public View getView(int position, View convertView, ViewGroup parent) {
+				View view = null;
+				if("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+					ViewHolder vh;
+					if (convertView == null) {
+						view = getLayoutInflater()
+								.inflate(R.layout.listitemview_inven,
+										parent, false);
+						vh = new ViewHolder(view);
+						view.setTag(vh);
+					} else {
+						view = convertView;
+						vh = (ViewHolder) view.getTag();
+					}
+					Eqpt eqpt = inventoryEqptlist.get(position);
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：" + eqpt.EquipmentCode));
+					vh.tv_equipmentName
+							.setText(MyUtils.ToDBC("资产名称：" + eqpt.EquipmentName));
+					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
+					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：" + eqpt.DepartmentName));
+					if ((position + 1) > inventoryEqptlist.size()
+							- yesInventoryEqptlist.size()) {
+						vh.tv_equipmentCode.setTextColor(Color.BLACK);
+						vh.tv_equipmentName.setTextColor(Color.BLACK);
+						vh.tv_equipmentPosition.setTextColor(Color.BLACK);
+						vh.tv_departmentName.setTextColor(Color.BLACK);
+						convertView.setClickable(false);
+					}else{
+						vh.tv_equipmentCode.setTextColor(Color.RED);
+						vh.tv_equipmentName.setTextColor(Color.RED);
+						vh.tv_equipmentPosition.setTextColor(Color.RED);
+						vh.tv_departmentName.setTextColor(Color.RED);
+					}
+				}else if("2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+					ViewHolder1 vh;
+					if (convertView == null) {
+						view = getLayoutInflater()
+								.inflate(R.layout.listitemview_inven,
+										parent, false);
+						vh = new ViewHolder1(view);
+						view.setTag(vh);
+					} else {
+						view = convertView;
+						vh = (ViewHolder1) view.getTag();
+					}
+					Eqpt eqpt = inventoryEqptlist.get(position);
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：" + eqpt.EquipmentCode));
+					vh.tv_equipmentName
+							.setText(MyUtils.ToDBC("资产名称：" + eqpt.EquipmentName));
+					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
+					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：" + eqpt.DepartmentName));
+					vh.iv.setVisibility(View.VISIBLE);
+					imageLoader.displayImage("file://" + FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,vh.iv);
+					if ((position + 1) > inventoryEqptlist.size()
+							- yesInventoryEqptlist.size()) {
+						vh.tv_equipmentCode.setTextColor(Color.BLACK);
+						vh.tv_equipmentName.setTextColor(Color.BLACK);
+						vh.tv_equipmentPosition.setTextColor(Color.BLACK);
+						vh.tv_departmentName.setTextColor(Color.BLACK);
+						convertView.setClickable(false);
+					}else{
+						vh.tv_equipmentCode.setTextColor(Color.RED);
+						vh.tv_equipmentName.setTextColor(Color.RED);
+						vh.tv_equipmentPosition.setTextColor(Color.RED);
+						vh.tv_departmentName.setTextColor(Color.RED);
+					}
 				}
-				return tv;
+				return view;
 			}
 		};
 		listView.setAdapter(adapter);
+		listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, true, true)); // 设置滚动时不加载图片
 		if (btnStart.isEnabled()) {
 			listView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -250,6 +325,39 @@ public class InventoryActivity extends BaseActivity {
 					}
 				}
 			});
+		}
+	}
+
+	static class ViewHolder {
+		@InjectView(R.id.tv_equipmentCode)
+		TextView tv_equipmentCode;
+		@InjectView(R.id.tv_equipmentName)
+		TextView tv_equipmentName;
+
+		@InjectView(R.id.tv_equipmentPosition)
+		TextView tv_equipmentPosition;
+		@InjectView(R.id.tv_departmentName)
+		TextView tv_departmentName;
+		public ViewHolder(View view) {
+			ButterKnife.inject(this, view);
+		}
+	}
+
+	static class ViewHolder1 {
+		@InjectView(R.id.tv_equipmentCode)
+		TextView tv_equipmentCode;
+		@InjectView(R.id.tv_equipmentName)
+		TextView tv_equipmentName;
+
+		@InjectView(R.id.tv_equipmentPosition)
+		TextView tv_equipmentPosition;
+		@InjectView(R.id.tv_departmentName)
+		TextView tv_departmentName;
+		@InjectView(R.id.iv)
+		ImageView iv;
+
+		public ViewHolder1(View view) {
+			ButterKnife.inject(this, view);
 		}
 	}
 	private void ReadHandleUI() {

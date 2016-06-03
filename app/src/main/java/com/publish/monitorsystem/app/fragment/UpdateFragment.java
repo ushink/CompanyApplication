@@ -1,8 +1,11 @@
 package com.publish.monitorsystem.app.fragment;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +16,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +28,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -33,7 +39,9 @@ import com.msystemlib.http.HttpConn;
 import com.msystemlib.http.IWebServiceCallBack;
 import com.msystemlib.http.JsonToBean;
 import com.msystemlib.utils.AlertUtils;
+import com.msystemlib.utils.FileUtils;
 import com.msystemlib.utils.LogUtils;
+import com.msystemlib.utils.SDUtils;
 import com.msystemlib.utils.SPUtils;
 import com.msystemlib.utils.ThreadUtils;
 import com.msystemlib.utils.ToastUtils;
@@ -59,8 +67,12 @@ import com.publish.monitorsystem.api.db.dao.RoomDao;
 import com.publish.monitorsystem.api.db.dao.UploadInventoryDao;
 import com.publish.monitorsystem.api.db.dao.UploadInventoryEqptDao;
 import com.publish.monitorsystem.api.utils.FormatJsonUtils;
+import com.publish.monitorsystem.app.LocalActivity;
 import com.publish.monitorsystem.application.SysApplication;
 import com.publish.monitorsystem.view.MyProgressBar;
+
+import net.tsz.afinal.FinalHttp;
+import net.tsz.afinal.http.AjaxCallBack;
 
 public class UpdateFragment extends BaseFragment implements OnItemClickListener {
 
@@ -88,6 +100,9 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	private GirdViewAdapter adapter;
 	private List<Eqpt> eqptBeanList;
 	private SysApplication myapp;
+
+//	private static String SD_FOLDER = ;
+	private ArrayList<String> temp = new ArrayList<>();
 	
 	private int pageIndexeqpt;//设备信息分页索引
 	private int pageIndexInventoryEqpt;//设备信息分页索引
@@ -101,7 +116,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	private boolean isRunning = false;//是否在测试连接
 	private int firstIn = 0;//第一次执行onResume
 	
-	private List<UploadInventoryEqpt> pageInventoryEqpt;
+	private List<UploadInventoryEqpt> pageInventoryEqpt;//上传子表
 	private int size;//上传数据总数
 	private int uploadCount;//上传进度参数
 	private int index;//总页数
@@ -115,6 +130,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	private final int DOWNLOADPLANEND = 85;//下载盘点对话框数据量总数
 	private final int UPLOADINVENTORY = 86;//上传盘点设备信息表
 	private final int UPLOADINVENTORYEND = 87;//上传盘点设备信息表结束
+	private final int DOWNLOADIMG = 88;//上传盘点设备信息表结束
 	private Handler handler = new Handler(){
 		public void handleMessage(android.os.Message msg) {
 			switch (msg.what) {
@@ -158,8 +174,12 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 				uploadCount += size - pageSize*(index - 1);
 				uploadInventoryInfo(uploadCount);
 				break;
-				
+			case DOWNLOADIMG:
+				pro.setProgress(addCount*100/temp.size());
+				tvPro.setText("已下载 ：" + addCount + "/ 共" + temp.size() + "条");
+				break;
 			}
+
 			
 		};
 	};
@@ -179,9 +199,11 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 		
 		typeID = SysApplication.gainData(Const.TYPEID).toString().trim();
 		if("1".equals(typeID) || "2".equals(typeID)){
+			//设备及营具系统
 			names = new String[]{"更新最新信息","获取盘点计划","上传最新信息"};
 			imageIds = new int[]{R.drawable.getdevice,R.drawable.getcheck,R.drawable.upload };
 		}else if("3".equals(typeID)){
+			//档案系统
 			names  = new String[]{"更新最新信息","获取盘点计划","上传最新信息",
 					"获取查找计划"};
 //			,"获取核检计划"  ,R.drawable.getagain
@@ -215,64 +237,22 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 		
 		return view;
 	}
-	
-
-	/**
-	 * 上传盘点信息
-	 * @param count
-	 */
-	protected void uploadInventoryInfo(final int count) {
-		String json = FormatJsonUtils.formatJson(pageInventoryEqpt);
-		properties.put("strJson", json);
-		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.UPLOADINVENTORYINFO, properties, new IWebServiceCallBack() {
-			
-			@Override
-			public void onSucced(SoapObject result) {
-				if(result != null){
-					String string = result.getProperty(0).toString();
-					if("true".equals(string) ){
-						pro.setProgress(count*100/size);
-						tvPro.setText("已下载 ：" + count + "/ 共" + size + "条");
-						if(in < index){
-							getInventoryInfo();
-						}else{
-							in = 0;
-							downloadDialog.dismiss();
-							AlertUtils.dialog1(getActivity(), "提示", "上传成功！", new DialogInterface.OnClickListener() {
-								
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									uploadInventoryEqptDao.deleteAllUploadInventoryEqpt();
-									uploadInventoryEqptDao.deleteAllUploadInventory();
-									myapp.Devaddrs.clear();
-									dialog.dismiss();
-								}
-							}, null);
-						}
-					}
-				}
-			}
-			
-			@Override
-			public void onFailure(String result) {
-				ToastUtils.showToast(getActivity(), "联网失败");
-				downloadDialog.dismiss();
-			}
-		});
-	}
-
 
 	@Override
 	public void initData() {
+		//数据处理层初始化
 		eqptDao = EqptDao.getInstance(getActivity());
 		inventoryDao = InventoryDao.getInstance(getActivity());
 		inventoryEqptDao = InventoryEqptDao.getInstance(getActivity());
 		buildingDao = BuildingDao.getInstance(getActivity());
-		Application app=getActivity().getApplication();
-		myapp=(SysApplication)app;
 		roomDao = RoomDao.getInstance(getActivity());
 		uploadInventoryDao = UploadInventoryDao.getInstance(getActivity());
 		uploadInventoryEqptDao = UploadInventoryEqptDao.getInstance(getActivity());
+		//变量初始化
+		Application app=getActivity().getApplication();
+		myapp=(SysApplication)app;
+
+		//开启联网判断
 		TestConn();
 		isRunning = true;
 		handler.sendEmptyMessageDelayed(FLUSH, 5000);
@@ -309,9 +289,8 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			long id) {
 		switch (position) {
 		case 0: //更新最新信息
-			if("1".equals(typeID)){
 				AlertUtils.dialog1(getActivity(), "提示", "是否清空及更新最新信息？",new DialogInterface.OnClickListener() {
-					
+
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
@@ -326,15 +305,20 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 									//联网成功后删除所有之前缓存信息
 									eqptDao.deleteAllEqpt();
 									String string = result.getProperty(0).toString();
-									equipmentSize = Integer.parseInt(string);
-									tvPro.setText("已下载 ：0/ 共"+ equipmentSize +"条");
-									properties.put("PageSize", pageSize + "");
-									pageIndexeqpt = 1;
-									properties.put("PageIndex", pageIndexeqpt + "");
-									getData(Const.GETEQUIPMENTTAGINFO);
+									if(!"404".equals(string)){
+										equipmentSize = Integer.parseInt(string);
+										tvPro.setText("已下载 ：0/ 共"+ equipmentSize +"条");
+										properties.put("PageSize", pageSize + "");
+										pageIndexeqpt = 1;
+										properties.put("PageIndex", pageIndexeqpt + "");
+										getData(Const.GETEQUIPMENTTAGINFO);
+									}else{
+										ToastUtils.showToast(getActivity(), "没有设备信息");
+										downloadDialog.dismiss();
+									}
 								}
 							}
-							
+
 							@Override
 							public void onFailure(String result) {
 								ToastUtils.showToast(getActivity(), "联网失败");
@@ -343,24 +327,21 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 						});
 					}
 				} , new DialogInterface.OnClickListener() {
-					
+
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
 					}
 				});
-			}
-			
 			break;
 		case 1: //获取盘点计划
 			//FunctionID 1盘点2查找3核检
-			if("1".equals(typeID)){
 				AlertUtils.dialog1(getActivity(), "提示", "是否清空及更新最新信息？",new DialogInterface.OnClickListener() {
-					
+
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
-						if(uploadInventoryDao.getSize() > 0){
+						if(uploadInventoryEqptDao.getSize() > 0){
 							ToastUtils.showToast(getActivity(), "请先上传完盘点信息，再更新新的盘点计划");
 							return;
 						}
@@ -374,7 +355,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 						inventory.UploadTime = "";
 						//下载盘点计划时创建此次盘点的主表
 						uploadInventoryDao.addUploadInventory(inventory);
-						
+
 						properties = new HashMap<String, String>();
 						properties.put("TypeID", SysApplication.gainData(Const.TYPEID).toString().trim());
 						properties.put("FunctionID", 1+"");
@@ -382,6 +363,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 
 							@Override
 							public void onSucced(SoapObject result) {
+
 								if(result != null){
 									//联网成功后删除所有之前缓存信息
 									inventoryDao.deleteAllInventory();
@@ -392,10 +374,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 									String string = result.getProperty(0).toString();
 									if(!"404".equals(string) && !"405".equals(string)){
 										getBuildingAndRoom(string);
+									}else{
+										downloadDialog.dismiss();
+										ToastUtils.showToast(getActivity(), "未制定盘点计划");
 									}
 								}
 							}
-							
+
 							@Override
 							public void onFailure(String result) {
 								ToastUtils.showToast(getActivity(), "联网失败");
@@ -404,16 +389,14 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 						});
 					}
 				},new DialogInterface.OnClickListener() {
-					
+
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
 					}
 				});
-			}
 			break;
 		case 2: //上传最新信息
-			if("1".equals(typeID)){
 				if(uploadInventoryDao.getSize() < 0 || uploadInventoryDao.getSize() == 0
 						|| uploadInventoryEqptDao.getSize() < 0 
 						|| uploadInventoryEqptDao.getSize() == 0){
@@ -431,11 +414,9 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 				String jsonArray = FormatJsonUtils.formatJson(uploadInventory);
 				size = uploadInventoryEqptDao.getSize();
 				pageInventoryEqpt = uploadInventoryEqptDao.getPageInventoryEqpt(pageSize, 0);
-				Log.d("ckj", FormatJsonUtils.formatJson(pageInventoryEqpt));
 				index = size % pageSize != 0 ? (size / pageSize + 1) : size / pageSize;
 				properties = new HashMap<String, String>();
 				properties.put("strJson", jsonArray);
-				Log.d("ckj", jsonArray);
 				tvPro.setText("已下载 ：0/ 共"+ size +"条");
 				HttpConn.callService(Const.URL, Const.NAMESPACE, Const.UPLOADINVENTORY, properties, new IWebServiceCallBack() {
 					
@@ -455,8 +436,8 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 						downloadDialog.dismiss();
 					}
 				});
-			}
-			//{"InventoryID":"29702702-b9f7-44d0-a5c4-d1ecd7cf90b7","ParentPlanID":"bc8c2190-8ea6-4178-9ef5-a392b6b4041a","UploadTime":"2016/03/31 11:33"}
+				//{"InventoryID":"29702702-b9f7-44d0-a5c4-d1ecd7cf90b7","ParentPlanID":"bc8c2190-8ea6-4178-9ef5-a392b6b4041a","UploadTime":"2016/03/31 11:33"}
+
 			break;
 		case 3: //获取查找计划
 			properties.put("TypeID", SysApplication.gainData(Const.TYPEID).toString().trim());
@@ -519,6 +500,49 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 		});
 	}
 
+	/**
+	 * 上传盘点信息
+	 * @param count
+	 */
+	protected void uploadInventoryInfo(final int count) {
+		String json = FormatJsonUtils.formatJson(pageInventoryEqpt);
+		properties.put("strJson", json);
+		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.UPLOADINVENTORYINFO, properties, new IWebServiceCallBack() {
+
+			@Override
+			public void onSucced(SoapObject result) {
+				if(result != null){
+					String string = result.getProperty(0).toString();
+					if("true".equals(string) ){
+						pro.setProgress(count*100/size);
+						tvPro.setText("已上传 ：" + count + "/ 共" + size + "条");
+						if(in < index){
+							getInventoryInfo();
+						}else{
+							in = 0;
+							downloadDialog.dismiss();
+							AlertUtils.dialog1(getActivity(), "提示", "上传成功！", new DialogInterface.OnClickListener() {
+
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									uploadInventoryEqptDao.deleteAllUploadInventoryEqpt();
+									uploadInventoryEqptDao.deleteAllUploadInventory();
+									myapp.Devaddrs.clear();
+									dialog.dismiss();
+								}
+							}, null);
+						}
+					}
+				}
+			}
+
+			@Override
+			public void onFailure(String result) {
+				ToastUtils.showToast(getActivity(), "联网失败");
+				downloadDialog.dismiss();
+			}
+		});
+	}
 
 	/**
 	 * 获取建筑和房间列表
@@ -726,19 +750,109 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			downloadDialog.dismiss();
 			addCount = 0;
 			i = 0;
-			ThreadUtils.runInMainThread(new Runnable() {
-				@Override
-				public void run() {
-					AlertUtils.dialog1(getActivity(), "提示", "设备同步成功！", new DialogInterface.OnClickListener() {
-						
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
-						}
-					}, null);
+			if(!"".equals(eqptBeanList.get(0).ImageName)){//判断是否为营具系统
+
+				for (Eqpt eqpt : eqptDao.getAllEqptList()){
+					temp.add(eqpt.ImageName);
 				}
-			});
-		
+				removeDuplicate(temp);
+				ThreadUtils.runInMainThread(new Runnable() {
+					@Override
+					public void run() {
+						downloadDialog = showDownloadDialog(getActivity(), "正在下载图片", "已下载 ：0/ 共"+temp.size()+"条", i);
+						downloadDialog.show();
+						downLoadFile(getActivity(),Const.URL_IMG +"/" + temp.get(addCount),temp.get(addCount));
+					}
+				});
+
+			}else{
+				ThreadUtils.runInMainThread(new Runnable() {
+					@Override
+					public void run() {
+						AlertUtils.dialog1(getActivity(), "提示", "设备同步成功！", new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								dialog.dismiss();
+							}
+						}, null);
+					}
+				});
+
+			}
+
+
+
+		}
+	}
+
+	/**
+	 * 去除list重复数据
+	 * @param list
+     */
+	public   static   void  removeDuplicate(List list)   {
+		HashSet h  =   new  HashSet(list);
+		list.clear();
+		list.addAll(h);
+	}
+	/**
+	 * 从服务器中下载文件
+	 */
+	private void downLoadFile(final Context mContext,final String downURL,String name) {
+		FinalHttp fh = new FinalHttp();
+		String status = Environment.getExternalStorageState();
+		if (status.equals(Environment.MEDIA_MOUNTED)) {
+			if(SDUtils.getSDFreeSize()>10){//判断内存卡大小
+				File file=new File(FileUtils.gainSDCardPath() +"/IMGcache/" + name);
+				if(file.exists()){
+					addCount ++;
+					handler.sendEmptyMessage(DOWNLOADIMG);
+					if(addCount < temp.size()){//迭代下载每一张图片
+						downLoadFile(getActivity(),Const.URL_IMG +"/" + temp.get(addCount),temp.get(addCount));
+					}else{
+						downloadDialog.dismiss();
+						addCount = 0;
+						i = 0;
+						AlertUtils.dialog1(getActivity(), "提示", "营具同步成功！", new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								dialog.dismiss();
+							}
+						}, null);
+					}
+				}else{
+					fh.download(downURL, FileUtils.gainSDCardPath() +"/IMGcache/" + name,new AjaxCallBack<File>() {
+						@Override
+						public void onLoading(long count, long current) {
+						}
+
+						@Override
+						public void onSuccess(File t) {
+							addCount ++;
+							handler.sendEmptyMessage(DOWNLOADIMG);//下载成功修改下载进度
+							if(addCount < temp.size()){
+								downLoadFile(getActivity(),Const.URL_IMG +"/" + temp.get(addCount),temp.get(addCount));
+							}else{
+								downloadDialog.dismiss();
+								addCount = 0;
+								i = 0;
+								AlertUtils.dialog1(getActivity(), "提示", "营具同步成功！", new DialogInterface.OnClickListener() {
+
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										dialog.dismiss();
+									}
+								}, null);
+							}
+						}
+					});
+				}
+			}else{
+				Toast.makeText(mContext, "内存卡空间不足",Toast.LENGTH_LONG).show();
+			}
+		}else{
+			Toast.makeText(mContext, "没有储存卡",Toast.LENGTH_LONG).show();
 		}
 	}
 	

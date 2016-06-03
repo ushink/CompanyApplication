@@ -52,7 +52,7 @@ private SysApplication myapp;
 		eqptDao.updateInventoryEqpt();
 		uploadInventoryEqptDao.deleteAllUploadInventoryEqpt();
 		uploadInventoryEqptDao.deleteAllUploadInventory();
-//		myapp.Devaddrs.clear();
+		myapp.Devaddrs.clear();
 	}
 
 	@Override

@@ -1,4 +1,9 @@
 package com.publish.monitorsystem.api;
+
+import android.os.Environment;
+
+import com.msystemlib.utils.FileUtils;
+
 /**
  * 一些系统常量的定义
  * 
@@ -15,7 +20,8 @@ public class Const {
 	public static final String DB_NAME = "MonitoringSystem.db";
 	
 	//服务器相关
-	public static final String URL = "http://192.168.1.50:7071/RSWebService.asmx";
+	public static final String URL = "http://192.168.1.50:9051/RSWebService.asmx";
+	public static final String URL_IMG = "http://192.168.1.50:7002";
 	public static final String NAMESPACE = "http://tempuri.org/";
 	public static final String TESTCONNECT = "TestConnect";
 	public static final String GETLOGINUSERLIST = "GetLoginUserList";//得到用户列表

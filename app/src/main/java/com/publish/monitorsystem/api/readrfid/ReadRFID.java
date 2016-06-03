@@ -38,7 +38,6 @@ public class ReadRFID implements IReadRFID{
 
 		READER_ERR er = myapp.Mreader.InitReader_Notype(
 				"/dev/ttyMT2", 1);
-		Log.d("ckj", er.toString());
 		if (er == READER_ERR.MT_OK_ERR) {
 			myapp.antportc = 1;
 

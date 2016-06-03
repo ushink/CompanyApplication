@@ -86,8 +86,8 @@ public class LoginActivity extends BaseActivity{
     private void matchUser(final String userName, final String pwd) {
         UserBean.User user = userDao.getUserInfo(userName);
         SysApplication.assignData(Const.USERNAME, userName);
-        if(user != null){
-			SysApplication.assignData(Const.TYPEID, Integer.parseInt(user.TypeID.trim()) + 2);
+        if(user != null && !"".equals(user.TypeID)){
+//			SysApplication.assignData(Const.TYPEID, Integer.parseInt(user.TypeID.trim()) - 1);
             SysApplication.assignData(Const.TYPEID, user.TypeID);
         }
         boolean avaiLogin = userDao.avaiLogin(userName, pwd);
@@ -118,7 +118,6 @@ public class LoginActivity extends BaseActivity{
 
     @Override
     public void destroy() {
-
     }
     private long exitTime = 0;
     private Dialog loadingDialog;

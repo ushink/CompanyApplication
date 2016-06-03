@@ -218,14 +218,14 @@ public class EqptDao {
 
 	public Eqpt getEqptByEPC(String EPC) {
 		EqptBean bean = new EqptBean();
-		Eqpt eqpt = bean.new Eqpt();
-		;
+		Eqpt eqpt = null;
 		SQLiteDatabase database = null;
 		try {
 			database = helper.getReadableDatabase();
 			Cursor cursor = database.query(TABLE_NAME, null, "EPC = ?",
 					new String[] { EPC }, null, null, null);
 			if (cursor.moveToNext()) {
+				eqpt = bean.new Eqpt();
 				eqpt.EquipmentID = cursor.getString(cursor
 						.getColumnIndex("EquipmentID"));
 				eqpt.TypeID = cursor.getString(cursor.getColumnIndex("TypeID"));

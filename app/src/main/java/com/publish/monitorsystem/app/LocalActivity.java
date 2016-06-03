@@ -162,6 +162,7 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 			downloadDialog.show();
 			HashMap<String, String> properties = new HashMap<String, String>();
 			properties.put("IMEI", mobileIMEI);
+			LogUtils.d("ckj", mobileIMEI);
 			HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETLOGINUSERLIST, properties , new IWebServiceCallBack() {
 				
 				@Override
@@ -169,14 +170,19 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 					if(result != null){
 						final String string = result.getProperty(0).toString();
 						LogUtils.d("ckj", string);
-						ThreadUtils.runInBackground(new Runnable() {
+						if(!"404".equals(string)){
+							ThreadUtils.runInBackground(new Runnable() {
 
-							@Override
-							public void run() {
-								saveUserInfo(string);
-							}
-						});
-						
+								@Override
+								public void run() {
+									saveUserInfo(string);
+								}
+							});
+						}else{
+							ToastUtils.showToast(LocalActivity.this, "没有人员信息");
+							downloadDialog.dismiss();
+						}
+
 					}else{
 						ToastUtils.showToast(LocalActivity.this, "联网失败");
 						downloadDialog.dismiss();

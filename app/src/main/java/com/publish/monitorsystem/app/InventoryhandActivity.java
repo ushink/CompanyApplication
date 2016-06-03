@@ -18,14 +18,20 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 import com.msystemlib.base.BaseActivity;
+import com.msystemlib.img.ImgLoad;
+import com.msystemlib.utils.FileUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.pow.api.cls.RfidPower.PDATYPE;
 import com.publish.monitorsystem.R;
+import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.UploadInventoryEqpt;
 import com.publish.monitorsystem.api.bean.EqptBean.Eqpt;
 import com.publish.monitorsystem.api.db.dao.EqptDao;
@@ -69,6 +75,21 @@ public class InventoryhandActivity extends BaseActivity{
 	TextView tv_eqpt_UsePerson;
 	@InjectView(R.id.tv_eqpt_IsSecret)
 	TextView tv_eqpt_IsSecret;
+
+	@InjectView(R.id.ll_eqpt_InitialValue)
+	LinearLayout ll_eqpt_InitialValue;
+	@InjectView(R.id.ll_eqpt_ManagePerson)
+	LinearLayout ll_eqpt_ManagePerson;
+	@InjectView(R.id.ll_eqpt_OutFactoryNum)
+	LinearLayout ll_eqpt_OutFactoryNum;
+	@InjectView(R.id.ll_eqpt_ProjectName)
+	LinearLayout ll_eqpt_ProjectName;
+	@InjectView(R.id.ll_eqpt_type)
+	LinearLayout ll_eqpt_type;
+	@InjectView(R.id.ll_eqpt_IsSecret)
+	LinearLayout ll_eqpt_IsSecret;
+	@InjectView(R.id.iv)
+	ImageView iv;
 	
 	private SoundPool soundPool;
 	private SysApplication myapp;
@@ -83,6 +104,7 @@ public class InventoryhandActivity extends BaseActivity{
 	
 	private String roomID;
 	private Eqpt eqpt;
+	private ImageLoader imageLoader;
 	private String planID;
 	
 	@Override
@@ -94,34 +116,55 @@ public class InventoryhandActivity extends BaseActivity{
 	public void initView(View view) {
 		ButterKnife.inject(this);
 		tv_title.setText("手动盘点");
+		if("2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			iv.setVisibility(View.VISIBLE);
+			ll_eqpt_type.setVisibility(View.GONE);
+			ll_eqpt_OutFactoryNum.setVisibility(View.GONE);
+			ll_eqpt_InitialValue.setVisibility(View.GONE);
+			ll_eqpt_ProjectName.setVisibility(View.GONE);
+			ll_eqpt_ManagePerson.setVisibility(View.GONE);
+			ll_eqpt_IsSecret.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
 	public void doBusiness(Context mContext) {
+
+		//数据处理层初始化
 		inventoryEqptDao = InventoryEqptDao.getInstance(this);
 		eqptDao = EqptDao.getInstance(this);
 		uploadInventoryDao = UploadInventoryDao.getInstance(this);
 		uploadInventoryeqptDao = UploadInventoryEqptDao.getInstance(this);
-		
+		//变量初始化
+		imageLoader = ImgLoad.initImageLoader(InventoryhandActivity.this);
 		Intent intent = getIntent();
 		eqpt = (Eqpt) intent.getSerializableExtra("eqpt");
 		planID = intent.getStringExtra("planID");
 		roomID = intent.getStringExtra("roomID");
-		
-		tv_eqpt_code.setText(eqpt.EquipmentCode);
-		tv_eqpt_name.setText(eqpt.EquipmentName);
-		tv_eqpt_type.setText(eqpt.Specification);
-		tv_eqpt_OutFactoryNum.setText(eqpt.OutFactoryNum);
-		tv_eqpt_InitialValue.setText(eqpt.InitialValue);
-		tv_eqpt_ProjectName.setText(eqpt.ProjectName);
-		tv_eqpt_EquipmentPosition.setText(eqpt.EquipmentPosition);
-		tv_eqpt_DepartmentName.setText(eqpt.DepartmentName);
-		tv_eqpt_ManagePerson.setText(eqpt.ManagePerson);
-		tv_eqpt_UsePerson.setText(eqpt.UsePerson);
-		tv_eqpt_IsSecret.setText(eqpt.EquipmentCode);
-		if(null != eqpt.IsSecret){
-			tv_eqpt_IsSecret.setText(Integer.parseInt(eqpt.IsSecret) == 0?"非涉密":"涉密");
-        }
+		//view层初始化
+		if("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			tv_eqpt_code.setText(eqpt.EquipmentCode);
+			tv_eqpt_name.setText(eqpt.EquipmentName);
+			tv_eqpt_type.setText(eqpt.Specification);
+			tv_eqpt_OutFactoryNum.setText(eqpt.OutFactoryNum);
+			tv_eqpt_InitialValue.setText(eqpt.InitialValue);
+			tv_eqpt_ProjectName.setText(eqpt.ProjectName);
+			tv_eqpt_EquipmentPosition.setText(eqpt.EquipmentPosition);
+			tv_eqpt_DepartmentName.setText(eqpt.DepartmentName);
+			tv_eqpt_ManagePerson.setText(eqpt.ManagePerson);
+			tv_eqpt_UsePerson.setText(eqpt.UsePerson);
+			if(null != eqpt.IsSecret && !"".equals(eqpt.IsSecret)){
+				tv_eqpt_IsSecret.setText(Integer.parseInt(eqpt.IsSecret) == 0?"非涉密":"涉密");
+			}
+		}else if("2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			imageLoader.displayImage("file://" + FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,iv);
+			tv_eqpt_code.setText(eqpt.EquipmentCode);
+			tv_eqpt_name.setText(eqpt.EquipmentName);
+			tv_eqpt_EquipmentPosition.setText(eqpt.EquipmentPosition);
+			tv_eqpt_DepartmentName.setText(eqpt.DepartmentName);
+			tv_eqpt_UsePerson.setText(eqpt.UsePerson);
+		}
+
 		
 		soundPool= new SoundPool(10,AudioManager.STREAM_SYSTEM,5);
 		soundPool.load(this,R.raw.beep,1);

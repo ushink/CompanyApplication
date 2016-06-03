@@ -1,5 +1,6 @@
 package com.publish.monitorsystem.app;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -81,7 +82,7 @@ public class InventorySelActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				int inventoryPosition = spinner_inventorys.getSelectedItemPosition();
-				int buildingPosition = spinner_buildings.getSelectedItemPosition();
+//				int buildingPosition = spinner_buildings.getSelectedItemPosition();
 				int roomPosition = spinner_rooms.getSelectedItemPosition();
 				String planID = inventoryDao.getInventoryPlanID(inventorys[inventoryPosition]);
 				
@@ -103,10 +104,13 @@ public class InventorySelActivity extends BaseActivity {
 
 	@Override
 	public void doBusiness(Context mContext) {
+		//数据处理层初始化
 		inventoryDao = InventoryDao.getInstance(this);
 		buildingDao = BuildingDao.getInstance(this);
 		roomDao = RoomDao.getInstance(this);
 		inventoryEqptDao = InventoryEqptDao.getInstance(this);
+
+		//变量初始化
 		Application app=getApplication();
 		myapp=(SysApplication)app;
 		readRFID = new ReadRFID(myapp);
@@ -115,11 +119,15 @@ public class InventorySelActivity extends BaseActivity {
 			@Override
 			public void run() {
 				List<Inventory> allInventoryList = inventoryDao.getAllInventoryList();
-				inventorys = new String[allInventoryList.size() - 1];
+				List<String> temp = new ArrayList<String>();
 				for (int i = 0; i < allInventoryList.size(); i++) {
 					if(!allInventoryList.get(i).PlanID.equals(allInventoryList.get(i).ParentPlanID)){
-						inventorys[i] = allInventoryList.get(i).PlanName;
+						temp.add(allInventoryList.get(i).PlanName);
 					}
+				}
+				inventorys = new String[temp.size()];
+				for (int i = 0; i < temp.size(); i++) {
+					inventorys[i] = temp.get(i);
 				}
 				List<Room> allRoomList = roomDao.getAllRoomList();
 				rooms = new String[allRoomList.size()];

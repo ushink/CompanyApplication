@@ -15,6 +15,7 @@ import butterknife.InjectView;
 
 import com.msystemlib.base.BaseFragment;
 import com.msystemlib.common.adapter.GirdViewAdapter;
+import com.msystemlib.utils.LogUtils;
 import com.msystemlib.utils.ThreadUtils;
 import com.msystemlib.utils.ToastUtils;
 import com.publish.monitorsystem.R;
@@ -124,12 +125,14 @@ public class BusinessFragment extends BaseFragment implements
 
 	@Override
 	public void initData() {
+		//数据处理层初始化
 		eqptDao = EqptDao.getInstance(getActivity());
 		inventoryEqptDao = InventoryEqptDao.getInstance(getActivity());
 		buildingDao = BuildingDao.getInstance(getActivity());
 		roomDao = RoomDao.getInstance(getActivity());
 		inventoryDao = InventoryDao.getInstance(getActivity());
 		uploadInventoryDao = UploadInventoryDao.getInstance(getActivity());
+		//变量初始化
 		Application app = getActivity().getApplication();
 		myapp = (SysApplication) app;
 		myapp.spf = new SPconfig(getActivity());
@@ -141,44 +144,40 @@ public class BusinessFragment extends BaseFragment implements
 			long id) {
 		switch (position) {
 		case 0: // 盘点
-			if ("1".equals(typeID)){
-				if (eqptDao.getSize() < 0 || eqptDao.getSize() == 0
-						|| inventoryEqptDao.getSize() < 0
-						|| inventoryEqptDao.getSize() == 0
-						|| buildingDao.getSize() < 0 || buildingDao.getSize() == 0
-						|| roomDao.getSize() < 0 || roomDao.getSize() == 0
-						|| inventoryDao.getSize() < 0
-						|| inventoryDao.getSize() == 0
-						|| uploadInventoryDao.getSize() < 0
-						|| uploadInventoryDao.getSize() == 0) {
-					ToastUtils.showToast(getActivity(), "请先下载数据");
-					return;
-				}
-				ThreadUtils.runInBackground(new Runnable() {
-					
-					@Override
-					public void run() {
-						readRFID.initReader();
-						handler.sendEmptyMessage(INVENTORY);
-					}
-				});
+			if (eqptDao.getSize() < 0 || eqptDao.getSize() == 0
+					|| inventoryEqptDao.getSize() < 0
+					|| inventoryEqptDao.getSize() == 0
+					|| buildingDao.getSize() < 0 || buildingDao.getSize() == 0
+					|| roomDao.getSize() < 0 || roomDao.getSize() == 0
+					|| inventoryDao.getSize() < 0
+					|| inventoryDao.getSize() == 0
+					|| uploadInventoryDao.getSize() < 0
+					|| uploadInventoryDao.getSize() == 0) {
+				ToastUtils.showToast(getActivity(), "请先下载数据");
+				return;
 			}
+			ThreadUtils.runInBackground(new Runnable() {
+
+				@Override
+				public void run() {
+					readRFID.initReader();
+					handler.sendEmptyMessage(INVENTORY);
+				}
+			});
 			break;
 		case 1: // 读取
-			if ("1".equals(typeID)){
-				if (eqptDao.getSize() < 0 || eqptDao.getSize() == 0) {
-					ToastUtils.showToast(getActivity(), "请先下载数据");
-					return;
-				}
-				ThreadUtils.runInBackground(new Runnable() {
-					
-					@Override
-					public void run() {
-						readRFID.initReader();
-						handler.sendEmptyMessage(READ);
-					}
-				});
+			if (eqptDao.getSize() < 0 || eqptDao.getSize() == 0) {
+				ToastUtils.showToast(getActivity(), "请先下载数据");
+				return;
 			}
+			ThreadUtils.runInBackground(new Runnable() {
+
+				@Override
+				public void run() {
+					readRFID.initReader();
+					handler.sendEmptyMessage(READ);
+				}
+			});
 			break;
 		case 2: // 查找
 
