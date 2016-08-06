@@ -110,7 +110,8 @@ public class InventoryhandActivity extends BaseActivity{
 	private Eqpt eqpt;
 	private ImageLoader imageLoader;
 	private String planID;
-	
+	private String functionID;
+
 	@Override
 	public int bindLayout() {
 		return R.layout.activity_hand;
@@ -119,7 +120,7 @@ public class InventoryhandActivity extends BaseActivity{
 	@Override
 	public void initView(View view) {
 		ButterKnife.inject(this);
-		tv_title.setText("手动盘点");
+		tv_title.setText("手动");
 		if("2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
 			iv.setVisibility(View.VISIBLE);
 			ll_eqpt_type.setVisibility(View.GONE);
@@ -154,6 +155,7 @@ public class InventoryhandActivity extends BaseActivity{
 		eqpt = (Eqpt) intent.getSerializableExtra("eqpt");
 		planID = intent.getStringExtra("planID");
 		roomID = intent.getStringExtra("roomID");
+		functionID = intent.getStringExtra("functionID");
 		//view层初始化
 		if("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
 			tv_eqpt_code.setText(eqpt.EquipmentCode);
@@ -238,7 +240,8 @@ public class InventoryhandActivity extends BaseActivity{
 										SimpleDateFormat sdf = new SimpleDateFormat(
 												"yyyy/MM/dd HH:mm");// 设置时间显示格式
 										String str = sdf.format(date);// 将当前时间格式化为需要的类型
-										if (inventoryEqptDao.isInventoryEqptID(eqptByEPC.EquipmentID, planID)) {
+										eqptDao.updateEqpt(eqptByEPC.EPC,str);
+										if (inventoryEqptDao.isInventoryEqptID(eqptByEPC.EquipmentID, planID) && "1".equals(functionID)) {
 											UploadInventoryEqpt eqpt = new UploadInventoryEqpt();
 											eqpt.InfoID = UUID.randomUUID().toString();
 											eqpt.RoomID = roomID;

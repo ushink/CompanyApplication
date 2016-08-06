@@ -11,7 +11,7 @@ import com.msystemlib.utils.FileUtils;
 public class Const {
 	//用户相关
 	public static final String ADMIN = "admin";
-	public static final String ADMINPWD = "111111";
+	public static final String ADMINPWD = "admin";
 	public static final String USERNAME = "username";
 	public static final String TYPEID = "TypeID"; //1设备 2营具 3档案
 	public static final String PASSWORD = "password";
@@ -20,8 +20,9 @@ public class Const {
 	public static final String DB_NAME = "MonitoringSystem.db";
 	
 	//服务器相关
-	public static final String URL = "http://192.168.1.50:9051/RSWebService.asmx";
-	public static final String URL_IMG = "http://192.168.1.50:7002";
+	public static final String URL = "http://192.168.25.123:7001/RSWebService.asmx";
+//	public static final String URL = "http://192.168.1.220:7001/RSWebService.asmx";
+	public static final String URL_IMG = "http://192.168.25.123:7002";
 	public static final String NAMESPACE = "http://tempuri.org/";
 	public static final String TESTCONNECT = "TestConnect";
 	public static final String GETLOGINUSERLIST = "GetLoginUserList";//得到用户列表

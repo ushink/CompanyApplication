@@ -29,7 +29,7 @@ public class SysApplication extends MApplication {
 	/**对外提供整个应用生命周期的Context**/
 	private static Context instance;
 	private static final String LOG_DIR = Environment
-            .getExternalStorageDirectory().getAbsolutePath() + "/documentsystem/log/";
+            .getExternalStorageDirectory().getAbsolutePath() + "/monitorsystem/log/";
 	private static final String LOG_NAME = getCurrentDateString() + ".txt";
 	public static final String TAG = "jack";
 	/**
@@ -43,7 +43,7 @@ public class SysApplication extends MApplication {
 	public void onCreate() {
 		super.onCreate();
 		instance = this;
-//		Thread.setDefaultUncaughtExceptionHandler(handler);
+		Thread.setDefaultUncaughtExceptionHandler(handler);
 	}
 	UncaughtExceptionHandler handler = new UncaughtExceptionHandler() {
 		 
@@ -112,7 +112,7 @@ public class SysApplication extends MApplication {
      */
     private static String getCurrentDateString() {
         String result = null;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd",
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
                 Locale.getDefault());
         Date nowDate = new Date();
         result = sdf.format(nowDate);
@@ -141,7 +141,7 @@ public class SysApplication extends MApplication {
 	    public SPconfig spf;
 		public RfidPower Rpower;
 
-		public ReaderParams Rparams;
+		public ReaderParams Rparams = new ReaderParams();
 
 
 		public class ReaderParams
@@ -209,8 +209,8 @@ public class SysApplication extends MApplication {
 				optime=1000;
 				opro="GEN2";
 				checkant=1;
-				rpow=new int[]{3000,2000,2000,2000};
-				wpow=new int[]{2000,2000,2000,2000};
+				rpow=new int[]{3000,500,500,500};
+				wpow=new int[]{3000,500,500,500};
 				region=1;
 				frelen=0;
 				session=0;

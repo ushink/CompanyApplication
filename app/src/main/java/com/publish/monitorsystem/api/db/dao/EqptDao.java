@@ -63,6 +63,8 @@ public class EqptDao {
 			values.put("Remark", eqpt.Remark);
 			values.put("CreateTime", eqpt.CreateTime);
 			values.put("TagID", eqpt.TagID);
+			values.put("LangChaoBianHao", eqpt.LangChaoBianHao);
+			values.put("ContractName", eqpt.ContractName);
 			values.put("EPC", eqpt.EPC);
 			database.insert(TABLE_NAME, null, values);
 			flag = true;
@@ -110,6 +112,8 @@ public class EqptDao {
 				sql.append(eqpt.Remark + ",");
 				sql.append(eqpt.CreateTime + ",");
 				sql.append(eqpt.TagID + ",");
+				sql.append(eqpt.LangChaoBianHao + ",");
+				sql.append(eqpt.ContractName + ",");
 				sql.append(eqpt.EPC);
 				sql.append(");");
 				database.execSQL(sql.toString());
@@ -137,6 +141,25 @@ public class EqptDao {
 			flag = true;
 		} catch (Exception e) {
 			System.out.println("----deleteAllUserLog-->" + e.getMessage());
+		} finally {
+			if (database != null) {
+				database.close();
+			}
+		}
+		return flag;
+	}
+
+	public boolean updateEqpt(String EPC,String CreateTime) {
+		boolean flag = false;
+		SQLiteDatabase database = null;
+		try {
+			database = helper.getWritableDatabase();
+			ContentValues values = new ContentValues();
+			values.put("CreateTime", CreateTime);
+			database.update(TABLE_NAME, values , "EPC like ?", new String[]{"%"+EPC+"%"});
+			flag = true;
+		} catch (Exception e) {
+			System.out.println("----addUserLog-->" + e.getMessage());
 		} finally {
 			if (database != null) {
 				database.close();
@@ -202,6 +225,8 @@ public class EqptDao {
 				eqpt.CreateTime = cursor.getString(cursor
 						.getColumnIndex("CreateTime"));
 				eqpt.TagID = cursor.getString(cursor.getColumnIndex("TagID"));
+				eqpt.LangChaoBianHao = cursor.getString(cursor.getColumnIndex("LangChaoBianHao"));
+				eqpt.ContractName = cursor.getString(cursor.getColumnIndex("ContractName"));
 				eqpt.EPC = cursor.getString(cursor.getColumnIndex("EPC"));
 				list.add(eqpt);
 				eqpt = null;
@@ -272,6 +297,8 @@ public class EqptDao {
 				eqpt.CreateTime = cursor.getString(cursor
 						.getColumnIndex("CreateTime"));
 				eqpt.TagID = cursor.getString(cursor.getColumnIndex("TagID"));
+				eqpt.LangChaoBianHao = cursor.getString(cursor.getColumnIndex("LangChaoBianHao"));
+				eqpt.ContractName = cursor.getString(cursor.getColumnIndex("ContractName"));
 				eqpt.EPC = cursor.getString(cursor.getColumnIndex("EPC"));
 			}
 		} catch (Exception e) {

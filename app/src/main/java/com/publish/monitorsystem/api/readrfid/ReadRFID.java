@@ -21,6 +21,8 @@ import com.uhf.api.cls.Reader.Region_Conf;
 import com.uhf.api.cls.Reader.SL_TagProtocol;
 import com.uhf.api.cls.Reader.TagFilter_ST;
 
+import static com.publish.monitorsystem.application.SysApplication.*;
+
 public class ReadRFID implements IReadRFID{
 	SysApplication myapp;
 	public ReadRFID(SysApplication myapp) {
@@ -43,7 +45,6 @@ public class ReadRFID implements IReadRFID{
 
 			try {
 				READER_ERR er1;
-				myapp.Rparams = myapp.spf.ReadReaderParams();
 
 				if (myapp.Rparams.invpro.size() < 1)
 					myapp.Rparams.invpro.add("GEN2");

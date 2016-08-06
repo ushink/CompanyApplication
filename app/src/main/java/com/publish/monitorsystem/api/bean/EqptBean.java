@@ -30,6 +30,8 @@ public class EqptBean implements Serializable{
 		public String State;
 		public String Remark;
 		public String CreateTime;
+		public String ContractName;
+		public String LangChaoBianHao;
 		public String TagID;
 		public String EPC;
 

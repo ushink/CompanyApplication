@@ -39,6 +39,8 @@
         <activity android:name=".app.InventoryActivity"/>
         <activity android:name=".app.InventoryhandActivity"/>
         <activity android:name=".app.InventorySelActivity"/>
+        <activity android:name=".app.SerachListActivity"/>
+        <activity android:name=".app.SearchActivity"/>
 
         <receiver android:name=".app.USBBroadcastReceiver" >
             <intent-filter android:priority="900" >

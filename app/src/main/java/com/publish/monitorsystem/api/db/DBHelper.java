@@ -30,7 +30,6 @@ public class DBHelper extends SQLiteOpenHelper {
 		createUploadInventoryEqptTable(db);//盘点回传子表
 	}
 
-
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 	}
@@ -79,6 +78,8 @@ public class DBHelper extends SQLiteOpenHelper {
 		sql.append("Remark varchar(100),");
 		sql.append("CreateTime varchar(100),");
 		sql.append("TagID varchar(100) primary key,");
+		sql.append("LangChaoBianHao varchar(100) primary key,");
+		sql.append("ContractName varchar(100) primary key,");
 		sql.append("EPC varchar(100)");
 		sql.append(");");
 		db.execSQL(sql.toString());
@@ -121,7 +122,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	private void createInventoryEqptTable(SQLiteDatabase db) {
 		StringBuffer sql = new StringBuffer();
 		sql.append("create table inventoryeqpt(");
-		sql.append("ResultID varchar(100) primary key not null,");
+		sql.append("ResultID varchar(100) not null,");
 		sql.append("PlanID varchar(100) not null,");
 		sql.append("ParentPlanID varchar(100) not null,");
 		sql.append("EquipmentID varchar(100) not null,");

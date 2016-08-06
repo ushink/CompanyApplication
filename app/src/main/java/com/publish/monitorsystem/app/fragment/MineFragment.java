@@ -51,7 +51,8 @@ public class MineFragment extends BaseFragment implements OnClickListener {
 		ButterKnife.inject(this,view);
 		rlCheckversion.setOnClickListener(this);
 		rlFeedback.setOnClickListener(this);
-		rlAbout.setOnClickListener(this);
+		rlAbout.setVisibility(View.GONE);
+//		rlAbout.setOnClickListener(this);
 		rlLogout.setOnClickListener(this);
 		return view;
 	}
@@ -81,11 +82,11 @@ public class MineFragment extends BaseFragment implements OnClickListener {
 			startActivity(intent);
 			getActivity().overridePendingTransition(R.anim.base_slide_right_in, R.anim.base_slide_remain);
 			break;
-		case R.id.rl_about:
-			Intent intent1 = new Intent(getActivity(),AboutActivity.class);
-			startActivity(intent1);
-			getActivity().overridePendingTransition(R.anim.base_slide_right_in, R.anim.base_slide_remain);
-			break;
+//		case R.id.rl_about:
+//			Intent intent1 = new Intent(getActivity(),AboutActivity.class);
+//			startActivity(intent1);
+//			getActivity().overridePendingTransition(R.anim.base_slide_right_in, R.anim.base_slide_remain);
+//			break;
 		case R.id.rl_logout:
 			AlertUtils.dialog1(getActivity(), "退出", "是否退出当前账号?",new DialogInterface.OnClickListener() {
 				

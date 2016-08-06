@@ -115,7 +115,8 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 		rlLoaduser.setOnClickListener(this);
 		rlCheckversion.setOnClickListener(this);
 		rlFeedback.setOnClickListener(this);
-		rlAbout.setOnClickListener(this);
+//		rlAbout.setOnClickListener(this);
+		rlAbout.setVisibility(View.GONE);
 		rlLogout.setOnClickListener(this);
 		tvTestconn.setText("测试连接中...");
 	}
@@ -162,7 +163,6 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 			downloadDialog.show();
 			HashMap<String, String> properties = new HashMap<String, String>();
 			properties.put("IMEI", mobileIMEI);
-			LogUtils.d("ckj", mobileIMEI);
 			HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETLOGINUSERLIST, properties , new IWebServiceCallBack() {
 				
 				@Override
@@ -212,9 +212,9 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 		case R.id.rl_feedback://意见反馈
 			jump2Activity(LocalActivity.this,FeedBackActivity.class, null, false);
 			break;
-		case R.id.rl_about://关于
-			jump2Activity(LocalActivity.this,AboutActivity.class, null, false);
-			break;
+//		case R.id.rl_about://关于
+//			jump2Activity(LocalActivity.this,AboutActivity.class, null, false);
+//			break;
 		case R.id.rl_logout://用户退出
 			AlertUtils.dialog1(this, "退出", "是否退出当前账号?",new DialogInterface.OnClickListener() {
 				

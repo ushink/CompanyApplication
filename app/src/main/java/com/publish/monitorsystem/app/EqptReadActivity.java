@@ -6,6 +6,7 @@ import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.os.SystemClock;
 import android.view.KeyEvent;
 import android.view.View;
@@ -21,6 +22,7 @@ import com.msystemlib.base.BaseActivity;
 import com.msystemlib.img.ImgLoad;
 import com.msystemlib.utils.FileUtils;
 import com.msystemlib.utils.LogUtils;
+import com.msystemlib.utils.ThreadUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.PauseOnScrollListener;
 import com.pow.api.cls.RfidPower.PDATYPE;
@@ -76,37 +78,20 @@ public class EqptReadActivity extends BaseActivity {
 	private EqptDao eqptDao;
 	Map<String, TAGINFO> Devaddrs = new LinkedHashMap<String, TAGINFO>();// 有序
 	private SoundPool soundPool;
+	private final int CLICK = 80;
 	private SysApplication myapp;
-	private Handler handler = new Handler();
-	private ReadRFID readRFID;
-	private CommonAdapter adapter;
-	private Runnable_Reader runnable; 
-	@Override
-	public int bindLayout() {
-		return activity_eqptread;
-	}
+	private Handler handler = new Handler(){
+		@Override
+		public void handleMessage (Message msg) {
+			switch (msg.what){
+				case CLICK:
+					initClick();
+					break;
+			}
+		}
+	};
 
-	@Override
-	public void initView(View view) {
-		ButterKnife.inject(this);
-		tv_title.setText("设备读取");
-	}
-
-	@Override
-	public void doBusiness(Context mContext) {
-		//声音池初始化
-		soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
-		soundPool.load(this, R.raw.beep, 1);
-		//变量初始化
-		Application app = getApplication();
-		myapp = (SysApplication) app;
-		runnable = new Runnable_Reader(myapp);
-		readRFID = new ReadRFID(myapp);
-		myapp.Rparams = myapp.new ReaderParams();
-		imageLoader = ImgLoad.initImageLoader(EqptReadActivity.this);
-		//数据处理层初始化
-		eqptDao = EqptDao.getInstance(this);
-
+	private void initClick () {
 		//view层初始化
 		btnStop.setEnabled(false);
 		btnStart.setOnClickListener(new OnClickListener() {
@@ -119,24 +104,24 @@ public class EqptReadActivity extends BaseActivity {
 					if (myapp.ThreadMODE == 0){
 						handler.postDelayed(runnable, 0);
 						runnable.setOnReadListener(new IRunneableReaderListener() {
-							
+
 							@Override
 							public void setView() {
 								showlist();
 							}
-							
+
 							@Override
 							public void setTagInventory_Raw(READER_ERR er) {
 								tv_state.setText("error:" + String.valueOf(er.value())
 										+ " " + er.toString());
 								handler.postDelayed(runnable, myapp.Rparams.sleep);
 							}
-							
+
 							@Override
 							public void setReadoncecnt(int i) {
 								tv_once.setText(String.valueOf(i));
 							}
-							
+
 							@Override
 							public void setReaderSound(String tag,TAGINFO tfs) {
 								if (!Devaddrs.containsKey(tag)) {
@@ -147,7 +132,7 @@ public class EqptReadActivity extends BaseActivity {
 									Devaddrs.put(tag, tfs);
 								}
 							}
-							
+
 							@Override
 							public void setReaderError(READER_ERR er) {
 								handler.removeCallbacks(runnable);
@@ -196,6 +181,47 @@ public class EqptReadActivity extends BaseActivity {
 
 		});
 	}
+
+	private ReadRFID readRFID;
+	private CommonAdapter adapter;
+	private Runnable_Reader runnable;
+
+	@Override
+	public int bindLayout() {
+		return R.layout.activity_eqptread;
+	}
+
+	@Override
+	public void initView(View view) {
+		ButterKnife.inject(this);
+		tv_title.setText("读取");
+	}
+
+	@Override
+	public void doBusiness(Context mContext) {
+		//声音池初始化
+		soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
+		soundPool.load(this, R.raw.beep, 1);
+		//变量初始化
+		Application app = getApplication();
+		myapp = (SysApplication) app;
+		runnable = new Runnable_Reader(myapp);
+		readRFID = new ReadRFID(myapp);
+		myapp.Rparams = myapp.new ReaderParams();
+		imageLoader = ImgLoad.initImageLoader(EqptReadActivity.this);
+		//数据处理层初始化
+		eqptDao = EqptDao.getInstance(this);
+		ThreadUtils.runInBackground(new Runnable() {
+
+			@Override
+			public void run() {
+				readRFID.initReader();
+				handler.sendEmptyMessage(CLICK);
+			}
+		});
+
+
+	}
 	private List<Eqpt> eqptList = new ArrayList<>();
 	/**
 	 * 显示读取列表
@@ -204,7 +230,7 @@ public class EqptReadActivity extends BaseActivity {
 		List<Map<String, ?>> list = new ArrayList<Map<String, ?>>();
 		Iterator<Entry<String, TAGINFO>> iesb;
 		synchronized (this) {
-			Map<String, TAGINFO> Devaddrs2 = new LinkedHashMap<String, TAGINFO>();
+			Map<String, TAGINFO> Devaddrs2 = new HashMap<String, TAGINFO>();
 			Devaddrs2.putAll(Devaddrs);
 			iesb = Devaddrs2.entrySet().iterator();
 		}
@@ -265,36 +291,46 @@ public class EqptReadActivity extends BaseActivity {
 			}
 		}else if("2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
 			//typeId为2时为营具系统
-			adapter =  new CommonAdapter<Eqpt>(eqptList) {
-				@Override
-				public View getView (int position, View convertView, ViewGroup parent) {
-					View view;
-					ViewHolder1 vh;
-					if (convertView == null) {
-						view = getLayoutInflater()
-								.inflate(R.layout.listitemview_inv_1,
-										parent, false);
-						vh = new ViewHolder1(view);
-						view.setTag(vh);
-					} else {
-						view = convertView;
-						vh = (ViewHolder1) view.getTag();
+			if(adapter != null){
+				adapter.notifyDataSetChanged();
+			}else {
+				adapter = new CommonAdapter<Eqpt>(eqptList) {
+					@Override
+					public View getView (int position, View convertView, ViewGroup parent) {
+						View view;
+						ViewHolder1 vh;
+						if (convertView == null) {
+							view = getLayoutInflater()
+									.inflate(R.layout.listitemview_inv_2,
+											parent, false);
+							vh = new ViewHolder1(view);
+							view.setTag(vh);
+						} else {
+							view = convertView;
+							vh = (ViewHolder1) view.getTag();
+						}
+						Eqpt eqpt = eqptList.get(position);
+						vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
+						vh.tv_equipmentName
+								.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
+						vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
+						vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：\n" + eqpt.DepartmentName));
+						vh.tv_usePerson.setText(MyUtils.ToDBC("使用人：\n" + eqpt.UsePerson));
+
+						vh.tv_LCCode.setText(MyUtils.ToDBC("浪潮编号：\n" + eqpt.LangChaoBianHao));
+						vh.tv_contractName.setText(MyUtils.ToDBC("合同名称：\n" + eqpt.ContractName));
+						imageLoader.displayImage("file://" + FileUtils.gainSDCardPath() + "/IMGcache/" + eqpt.ImageName, vh.iv);
+						return view;
 					}
-					Eqpt eqpt = eqptList.get(position);
-					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
-					vh.tv_equipmentName
-							.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
-					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：" + eqpt.EquipmentPosition));
-					vh.tv_departmentName.setText(MyUtils.ToDBC("使用部门：\n" + eqpt.DepartmentName));
-					vh.tv_usePerson.setText(MyUtils.ToDBC("使用人：\n" + eqpt.UsePerson));
-					imageLoader.displayImage("file://" +FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,vh.iv);
-					return view;
-				}
-			};
-			listView.setAdapter(adapter);
-			listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, true, true)); // 设置滚动时不加载图片
+				};
+				listView.setAdapter(adapter);
+				listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, true, true)); // 设置滚动时不加载图片
+			}
 		}else if("3".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
 			//typeId为3时为档案系统
+			if(adapter != null){
+				adapter.notifyDataSetChanged();
+			}else{
 			adapter =  new CommonAdapter<Eqpt>(eqptList) {
 				@Override
 				public View getView (int position, View convertView, ViewGroup parent) {
@@ -324,6 +360,7 @@ public class EqptReadActivity extends BaseActivity {
 				}
 			};
 			listView.setAdapter(adapter);
+		}
 		}
 	}
 
@@ -366,7 +403,10 @@ public class EqptReadActivity extends BaseActivity {
 		TextView tv_equipmentPosition;
 		@InjectView(R.id.tv_departmentName)
 		TextView tv_departmentName;
-
+		@InjectView(R.id.tv_LCCode)
+		TextView tv_LCCode;
+		@InjectView(R.id.tv_contractName)
+		TextView tv_contractName;
 		@InjectView(R.id.tv_usePerson)
 		TextView tv_usePerson;
 		@InjectView(R.id.iv)

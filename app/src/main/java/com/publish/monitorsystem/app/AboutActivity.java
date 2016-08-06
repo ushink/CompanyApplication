@@ -12,15 +12,20 @@ import butterknife.OnClick;
 
 import com.msystemlib.base.BaseActivity;
 import com.msystemlib.img.ImgLoad;
+import com.msystemlib.utils.LogUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.publish.monitorsystem.R;
+import com.publish.monitorsystem.api.Const;
+import com.publish.monitorsystem.api.db.dao.InventoryDao;
 import com.publish.monitorsystem.api.db.dao.InventoryEqptDao;
 import com.publish.monitorsystem.api.db.dao.UploadInventoryEqptDao;
 import com.publish.monitorsystem.application.SysApplication;
 
 public class AboutActivity extends BaseActivity {
 private InventoryEqptDao eqptDao;
+private InventoryDao inventoryDao;
 private UploadInventoryEqptDao uploadInventoryEqptDao;
+private InventoryEqptDao inventoryEqptDao;
 	@InjectView(R.id.iv)
 	ImageView iv;
 private SysApplication myapp;
@@ -48,10 +53,14 @@ private SysApplication myapp;
 		Application app=getApplication();
 		myapp=(SysApplication)app;
 		eqptDao = InventoryEqptDao.getInstance(this);
+		inventoryDao = InventoryDao.getInstance(this);
 		uploadInventoryEqptDao = UploadInventoryEqptDao.getInstance(this);
 		eqptDao.updateInventoryEqpt();
 		uploadInventoryEqptDao.deleteAllUploadInventoryEqpt();
 		uploadInventoryEqptDao.deleteAllUploadInventory();
+		LogUtils.d("ckj",inventoryDao.getInventory(SysApplication.gainData(Const.TYPEID).toString().trim(),1 + "").ParentPlanID);
+		boolean ss = eqptDao.deleteInventoryEqptByParentPlan(inventoryDao.getInventory(SysApplication.gainData(Const.TYPEID).toString().trim(),1 + "").ParentPlanID);
+		LogUtils.d("ckj",ss + "");
 		myapp.Devaddrs.clear();
 	}
 

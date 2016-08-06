@@ -18,6 +18,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 import com.msystemlib.base.BaseActivity;
+import com.msystemlib.utils.LogUtils;
 import com.msystemlib.utils.SPUtils;
 import com.msystemlib.utils.ThreadUtils;
 import com.publish.monitorsystem.R;
@@ -55,7 +56,9 @@ public class InventorySelActivity extends BaseActivity {
 	
 	private String[] inventorys,rooms;
 	private String[] Buildings;
-	
+
+	private int roomPosition;
+
 	private ArrayAdapter<String> adapter_inventorys;
 	private ArrayAdapter<String> adapter_rooms;
 	private ArrayAdapter<String> adapter_buildings;
@@ -72,8 +75,9 @@ public class InventorySelActivity extends BaseActivity {
 	}
 
 	protected void init() {
-		adapter_inventorys = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,inventorys); 
-		adapter_inventorys.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);    
+
+		adapter_inventorys = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,inventorys);
+		adapter_inventorys.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		spinner_inventorys.setAdapter(adapter_inventorys);
 		adapter_buildings = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,Buildings);
 		adapter_buildings.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -82,27 +86,21 @@ public class InventorySelActivity extends BaseActivity {
 			adapter_rooms = new ArrayAdapter<String>(InventorySelActivity.this,R.layout.simple_spinner_item,rooms);
 			adapter_rooms.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			spinner_rooms.setAdapter(adapter_rooms);
-		}else{
-			ll_rooms.setVisibility(View.GONE);
 		}
-
 		btn_inventory.setOnClickListener(new OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
 				int inventoryPosition = spinner_inventorys.getSelectedItemPosition();
 				int buildingPosition = spinner_buildings.getSelectedItemPosition();
-				String planID = inventoryDao.getInventoryPlanID(inventorys[inventoryPosition]);
-				String parentPlanID = inventoryEqptDao.getParentPlanID(planID);
-				SPUtils.saveString(InventorySelActivity.this, "ParentPlanID", parentPlanID);
-				String roomID = "";
-				if("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim()) || "2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
-					int roomPosition = spinner_rooms.getSelectedItemPosition();
-					roomID = roomDao.getRoomID(rooms[roomPosition]);
-				}
 				HashMap<String, String> map = new HashMap<String, String>();
-				map.put("planID", planID);
-				map.put("roomID", roomID);
+				map.put("planIDparam", inventorys[inventoryPosition]);
+				if("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim()) || "2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+					roomPosition = spinner_rooms.getSelectedItemPosition();
+					map.put("roomIDparam", rooms[roomPosition]);
+				}else{
+					map.put("roomIDparam", "-1");
+				}
 				jump2Activity(InventorySelActivity.this, InventoryActivity.class, map , false);
 			}
 		});		
@@ -111,11 +109,15 @@ public class InventorySelActivity extends BaseActivity {
 	@Override
 	public void initView(View view) {
 		ButterKnife.inject(this);
+		tvTitle.setText("盘点选择");
+		if(!"1".equals(SysApplication.gainData(Const.TYPEID).toString().trim()) && !"2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+			ll_rooms.setVisibility(View.GONE);
+		}
 	}
 
 	@Override
 	public void doBusiness(Context mContext) {
-		//数据处理层初始化
+//数据处理层初始化
 		inventoryDao = InventoryDao.getInstance(this);
 		buildingDao = BuildingDao.getInstance(this);
 		roomDao = RoomDao.getInstance(this);
@@ -129,7 +131,8 @@ public class InventorySelActivity extends BaseActivity {
 
 			@Override
 			public void run() {
-				List<Inventory> allInventoryList = inventoryDao.getAllInventoryList();
+				readRFID.initReader();
+				List<Inventory> allInventoryList = inventoryDao.getAllInventoryList(1);
 				List<String> temp = new ArrayList<String>();
 				for (int i = 0; i < allInventoryList.size(); i++) {
 					if(!allInventoryList.get(i).PlanID.equals(allInventoryList.get(i).ParentPlanID)){

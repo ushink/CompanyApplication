@@ -87,9 +87,7 @@ public class LoginActivity extends BaseActivity{
         UserBean.User user = userDao.getUserInfo(userName);
         SysApplication.assignData(Const.USERNAME, userName);
         if(user != null && !"".equals(user.TypeID)){
-//			SysApplication.assignData(Const.TYPEID, Integer.parseInt(user.TypeID.trim()) - 2);
             SysApplication.assignData(Const.TYPEID, user.TypeID);
-            LogUtils.d("ckj",user.TypeID);
         }
         boolean avaiLogin = userDao.avaiLogin(userName, pwd);
         if(avaiLogin){

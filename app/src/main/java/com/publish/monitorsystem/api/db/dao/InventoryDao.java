@@ -56,12 +56,31 @@ public class InventoryDao{
 		}
 		return flag;
 	}
-	
-	public boolean deleteAllInventory() {
+
+	public boolean up(String EPC,String CreateTime) {
 		boolean flag = false;
 		SQLiteDatabase database = null;
 		try {
-			String sql = "delete from " + TABLE_NAME;
+			database = helper.getWritableDatabase();
+			ContentValues values = new ContentValues();
+			values.put("PlanName", CreateTime);
+			database.update(TABLE_NAME, values , "PlanID like ?", new String[]{"%"+EPC+"%"});
+			flag = true;
+		} catch (Exception e) {
+			System.out.println("----addUserLog-->" + e.getMessage());
+		} finally {
+			if (database != null) {
+				database.close();
+			}
+		}
+		return flag;
+	}
+	
+	public boolean deleteAllInventory(int FunctionID) {
+		boolean flag = false;
+		SQLiteDatabase database = null;
+		try {
+			String sql = "delete from " + TABLE_NAME + " where FunctionID = " + FunctionID;
 			database = helper.getWritableDatabase();
 			database.execSQL(sql);
 			flag = true;
@@ -75,15 +94,33 @@ public class InventoryDao{
 		return flag;
 	}
 
-	public List<Inventory> getAllInventoryList() {
+	public boolean deleteAllInventory(String planID) {
+		boolean flag = false;
+		SQLiteDatabase database = null;
+		try {
+			String sql = "delete from " + TABLE_NAME + " where PlanID like'%" + planID + "%'";
+			database = helper.getWritableDatabase();
+			database.execSQL(sql);
+			flag = true;
+		} catch (Exception e) {
+			System.out.println("----deleteAllUserLog-->" + e.getMessage());
+		} finally {
+			if (database != null) {
+				database.close();
+			}
+		}
+		return flag;
+	}
+
+	public List<Inventory> getAllInventoryList(int FunctionID) {
 		List<Inventory> list = new ArrayList<Inventory>();
 		InventoryBean bean = new InventoryBean();
 		Inventory inventory;
-		String sql = "select * from " + TABLE_NAME;
 		SQLiteDatabase database = null;
 		try {
 			database = helper.getReadableDatabase();
-			Cursor cursor = database.rawQuery(sql, null);
+			Cursor cursor = database.query(TABLE_NAME,null, "FunctionID = ?",
+					new String[] { FunctionID + "" }, null, null, null);
 			while (cursor.moveToNext()) {
 				inventory = bean.new Inventory();
 				inventory.PlanID = cursor.getString(cursor
@@ -113,14 +150,14 @@ public class InventoryDao{
 		return list;
 	}
 	
-	public Inventory getInventory(String typeId) {
+	public Inventory getInventory(String typeId,String Function) {
 		InventoryBean bean = new InventoryBean();
 		Inventory inventory = bean.new Inventory();
 		SQLiteDatabase database = null;
 		try {
 			database = helper.getReadableDatabase();
-			Cursor cursor = database.query(TABLE_NAME, null, "TypeID = ?",
-					new String[] { typeId }, null, null, null);
+			Cursor cursor = database.query(TABLE_NAME, null, "TypeID = ? and FunctionID = ?",
+					new String[] { typeId, Function}, null, null, null);
 			if (cursor.moveToNext()) {
 				inventory.PlanID = cursor.getString(cursor
 						.getColumnIndex("PlanID"));
@@ -148,12 +185,32 @@ public class InventoryDao{
 	}
 	
 	public String getInventoryPlanID(String planName) {
-		String str = null;
+		String str = "";
+		SQLiteDatabase database = null;
+		try {
+			database = helper.getReadableDatabase();
+			Cursor cursor = database.query(TABLE_NAME, new String[]{"PlanID"}, "PlanName like ?",
+					new String[] { "%"+planName+"%" }, null, null, null);
+			if (cursor.moveToNext()) {
+				str = cursor.getString(cursor.getColumnIndex("PlanID"));
+			}
+		} catch (Exception e) {
+			System.out.println("----getAllUserLogList-->" + e.getMessage());
+		} finally {
+			if (database != null) {
+				database.close();
+			}
+		}
+		return str;
+	}
+
+	public String getInventoryPlanID1(String planName) {
+		String str = "";
 		SQLiteDatabase database = null;
 		try {
 			database = helper.getReadableDatabase();
 			Cursor cursor = database.query(TABLE_NAME, new String[]{"PlanID"}, "PlanName = ?",
-					new String[] { planName }, null, null, null);
+					new String[] { planName}, null, null, null);
 			if (cursor.moveToNext()) {
 				str = cursor.getString(cursor.getColumnIndex("PlanID"));
 			}

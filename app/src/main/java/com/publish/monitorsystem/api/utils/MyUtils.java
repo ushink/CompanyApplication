@@ -34,4 +34,18 @@ public class MyUtils {
         }
         return new String(c);
     }
+
+    /**
+     *重复点击判断
+     */
+    private static long lastClickTime;
+    public static boolean isFastDoubleClick() {
+        long time = System.currentTimeMillis();
+        long timeD = time - lastClickTime;
+        if ( 0 < timeD && timeD < 1000) {
+            return true;
+        }
+        lastClickTime = time;
+        return false;
+    }
 }

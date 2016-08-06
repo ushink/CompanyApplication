@@ -67,6 +67,7 @@ import com.publish.monitorsystem.api.db.dao.RoomDao;
 import com.publish.monitorsystem.api.db.dao.UploadInventoryDao;
 import com.publish.monitorsystem.api.db.dao.UploadInventoryEqptDao;
 import com.publish.monitorsystem.api.utils.FormatJsonUtils;
+import com.publish.monitorsystem.api.utils.MyUtils;
 import com.publish.monitorsystem.app.LocalActivity;
 import com.publish.monitorsystem.application.SysApplication;
 import com.publish.monitorsystem.view.MyProgressBar;
@@ -141,6 +142,9 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			case DOWNLOADEND:
 				pageIndexeqpt++;
 				if(pageIndexeqpt < equipmentSize / pageSize + 2){
+//					if(pageIndexeqpt == equipmentSize / pageSize + 1){
+//						properties.put("PageSize",(equipmentSize - pageSize*pageIndexeqpt)+"");
+//					}
 					properties.put("PageIndex", pageIndexeqpt + "");
 					getData(Const.GETEQUIPMENTTAGINFO);
 				}
@@ -152,8 +156,11 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			case DOWNLOADEINVENTORYND:
 				pageIndexInventoryEqpt++;
 				if(pageIndexInventoryEqpt < inventoryEqutSize / pageSize + 2){
-					properties.put("PageIndex", pageIndexInventoryEqpt + "");
-					getData(Const.GETINVENTORYEQPT);
+//					if(pageIndexInventoryEqpt == inventoryEqutSize / pageSize + 1){
+//						properties1.put("PageSize",(inventoryEqutSize - pageSize*pageIndexInventoryEqpt)+"");
+//					}
+					properties1.put("PageIndex", pageIndexInventoryEqpt + "");
+					getInventoryData(Const.GETINVENTORYEQPT);
 				}
 				break;
 			case FLUSH:
@@ -251,7 +258,6 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 		//变量初始化
 		Application app=getActivity().getApplication();
 		myapp=(SysApplication)app;
-
 		//开启联网判断
 		TestConn();
 		isRunning = true;
@@ -305,6 +311,10 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 									//联网成功后删除所有之前缓存信息
 									eqptDao.deleteAllEqpt();
 									String string = result.getProperty(0).toString();
+									if("NULL".equals(string)){
+										downloadDialog.dismiss();
+										return;
+									}
 									if(!"404".equals(string)){
 										equipmentSize = Integer.parseInt(string);
 										tvPro.setText("已下载 ：0/ 共"+ equipmentSize +"条");
@@ -351,6 +361,9 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 							ToastUtils.showToast(getActivity(), "请先上传完盘点信息，再更新新的盘点计划");
 							return;
 						}
+//						uploadInventoryEqptDao.deleteAllUploadInventoryEqpt();
+//						uploadInventoryDao.deleteAllUploadInventory();
+
 						downloadDialog = showDownloadDialog(getActivity(), "正在准备下载...", "已下载 ：0/ 共0条", i);
 						downloadDialog.show();
 						//联网成功后删除所有之前缓存信息
@@ -372,14 +385,16 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 
 								if(result != null){
 									//联网成功后删除所有之前缓存信息
-									inventoryDao.deleteAllInventory();
 									buildingDao.deleteAllBuilding();
 									roomDao.deleteAllRoom();
 									myapp.Devaddrs.clear();
-									inventoryEqptDao.deleteAllInventoryEqpt();
+									if(null != inventoryDao.getInventory(SysApplication.gainData(Const.TYPEID).toString().trim(),1 + "").ParentPlanID){
+										inventoryEqptDao.deleteInventoryEqptByParentPlan(inventoryDao.getInventory(SysApplication.gainData(Const.TYPEID).toString().trim(),1 + "").ParentPlanID);
+									}
+									inventoryDao.deleteAllInventory(1);
 									String string = result.getProperty(0).toString();
 									if(!"404".equals(string) && !"405".equals(string)){
-										getBuildingAndRoom(string);
+										getBuildingAndRoom(string + "&" + 1);
 									}else{
 										downloadDialog.dismiss();
 										ToastUtils.showToast(getActivity(), "未制定盘点计划");
@@ -423,7 +438,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 				index = size % pageSize != 0 ? (size / pageSize + 1) : size / pageSize;
 				properties = new HashMap<String, String>();
 				properties.put("strJson", jsonArray);
-				tvPro.setText("已下载 ：0/ 共"+ size +"条");
+				tvPro.setText("已上传 ：0/ 共"+ size +"条");
 				HttpConn.callService(Const.URL, Const.NAMESPACE, Const.UPLOADINVENTORY, properties, new IWebServiceCallBack() {
 					
 					@Override
@@ -446,20 +461,36 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 
 			break;
 		case 3: //获取查找计划
+			downloadDialog = showDownloadDialog(getActivity(), "正在准备下载...", "已下载 ：0/ 共0条", i);
+			downloadDialog.show();
+
+			properties = new HashMap<String, String>();
 			properties.put("TypeID", SysApplication.gainData(Const.TYPEID).toString().trim());
 			properties.put("FunctionID", 2+"");
 			HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETINVENTORYPLAN, properties, new IWebServiceCallBack() {
+
 				@Override
 				public void onSucced(SoapObject result) {
+
 					if(result != null){
+						//联网成功后删除所有之前缓存信息
+						buildingDao.deleteAllBuilding();
+						roomDao.deleteAllRoom();
+						myapp.Devaddrs.clear();
 						String string = result.getProperty(0).toString();
-						LogUtils.d("ckj", string);
+						if(!"404".equals(string) && !"405".equals(string)){
+							getBuildingAndRoom(string +"&" +2);
+						}else{
+							downloadDialog.dismiss();
+							ToastUtils.showToast(getActivity(), "未制定查找计划");
+						}
 					}
 				}
-				
+
 				@Override
 				public void onFailure(String result) {
 					ToastUtils.showToast(getActivity(), "联网失败");
+					downloadDialog.dismiss();
 				}
 			});
 			break;
@@ -512,6 +543,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	 */
 	protected void uploadInventoryInfo(final int count) {
 		String json = FormatJsonUtils.formatJson(pageInventoryEqpt);
+		LogUtils.d("ckj",json);
 		properties.put("strJson", json);
 		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.UPLOADINVENTORYINFO, properties, new IWebServiceCallBack() {
 
@@ -519,6 +551,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			public void onSucced(SoapObject result) {
 				if(result != null){
 					String string = result.getProperty(0).toString();
+                    LogUtils.d("ckj",string);
 					if("true".equals(string) ){
 						pro.setProgress(count*100/size);
 						tvPro.setText("已上传 ：" + count + "/ 共" + size + "条");
@@ -526,13 +559,14 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 							getInventoryInfo();
 						}else{
 							in = 0;
+							uploadCount = 0;
 							downloadDialog.dismiss();
+							uploadInventoryEqptDao.deleteAllUploadInventoryEqpt();
+							uploadInventoryDao.deleteAllUploadInventory();
 							AlertUtils.dialog1(getActivity(), "提示", "上传成功！", new DialogInterface.OnClickListener() {
 
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
-									uploadInventoryEqptDao.deleteAllUploadInventoryEqpt();
-									uploadInventoryEqptDao.deleteAllUploadInventory();
 									myapp.Devaddrs.clear();
 									dialog.dismiss();
 								}
@@ -590,6 +624,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 		});
 	}
 
+	private String FunctionID;
 	/**
 	 * 保存盘点计划
 	 * @param jsonStr
@@ -597,8 +632,9 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	protected void saveInventory(String jsonStr) {
 		String[] strs = jsonStr.split("&");
 		InventoryBean inventoryBean = JsonToBean.getJsonBean(strs[0], InventoryBean.class);
-		BuildingBean buildingBean = JsonToBean.getJsonBean(strs[1], BuildingBean.class);
-		RoomBean roomBean = JsonToBean.getJsonBean(strs[2], RoomBean.class);
+		FunctionID = strs[1];
+		BuildingBean buildingBean = JsonToBean.getJsonBean(strs[2], BuildingBean.class);
+		RoomBean roomBean = JsonToBean.getJsonBean(strs[3], RoomBean.class);
 		inventoryList = inventoryBean.ds;
 		buildingList = buildingBean.ds;
 		roomList = roomBean.ds;
@@ -622,14 +658,16 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	 */
 	protected void getInventoryEqptNum(){
 		properties1 = new HashMap<String, String>();
-		properties1.put("ParentPlanID", inventoryDao.getInventory(SysApplication.gainData(Const.TYPEID).toString().trim()).ParentPlanID);
+		properties1.put("ParentPlanID", inventoryDao.getInventory(SysApplication.gainData(Const.TYPEID).toString().trim(),FunctionID).ParentPlanID);
 		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETINVENTORYEQPTNUM, properties1 , new IWebServiceCallBack() {
 			
 			@Override
 			public void onSucced(SoapObject result) {
 				if(result != null){
 					String string = result.getProperty(0).toString();
-					inventoryEqutSize = Integer.parseInt(string);
+					if(null != string && !"".equals(string)){
+						inventoryEqutSize = Integer.parseInt(string);
+					}
 					LogUtils.d("ckj", inventoryEqutSize+"");
 					tvPro.setText("已下载 ：0/ 共"+ inventoryEqutSize +"条");
 					properties1.put("PageSize", pageSize + "");
@@ -696,7 +734,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			ThreadUtils.runInMainThread(new Runnable() {
 				@Override
 				public void run() {
-					AlertUtils.dialog1(getActivity(), "提示", "盘点计划同步成功！", new DialogInterface.OnClickListener() {
+					AlertUtils.dialog1(getActivity(), "提示", "计划同步成功！", new DialogInterface.OnClickListener() {
 						
 						@Override
 						public void onClick(DialogInterface dialog, int which) {
@@ -761,7 +799,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 				for (Eqpt eqpt : eqptDao.getAllEqptList()){
 					temp.add(eqpt.ImageName);
 				}
-				removeDuplicate(temp);
+				MyUtils.removeDuplicate(temp);
 				ThreadUtils.runInMainThread(new Runnable() {
 					@Override
 					public void run() {
@@ -803,15 +841,6 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 		}
 	}
 
-	/**
-	 * 去除list重复数据
-	 * @param list
-     */
-	public   static   void  removeDuplicate(List list)   {
-		HashSet h  =   new  HashSet(list);
-		list.clear();
-		list.addAll(h);
-	}
 	/**
 	 * 从服务器中下载文件
 	 */

@@ -27,9 +27,11 @@ import com.publish.monitorsystem.api.db.dao.InventoryEqptDao;
 import com.publish.monitorsystem.api.db.dao.RoomDao;
 import com.publish.monitorsystem.api.db.dao.UploadInventoryDao;
 import com.publish.monitorsystem.api.readrfid.ReadRFID;
+import com.publish.monitorsystem.api.utils.MyUtils;
 import com.publish.monitorsystem.api.utils.SPconfig;
 import com.publish.monitorsystem.app.EqptReadActivity;
 import com.publish.monitorsystem.app.InventorySelActivity;
+import com.publish.monitorsystem.app.SerachListActivity;
 import com.publish.monitorsystem.application.SysApplication;
 
 public class BusinessFragment extends BaseFragment implements
@@ -48,32 +50,7 @@ public class BusinessFragment extends BaseFragment implements
 	private String[] names;
 	private int[] imageIds;
 	private GirdViewAdapter adapter;
-	SysApplication myapp;
-	private ReadRFID readRFID;
-	
-	private final int INVENTORY = 100;
-	private final int READ = 101;
-	
-	private Handler handler = new Handler() {
-		public void handleMessage(android.os.Message msg) {
-			switch (msg.what) {
-			case INVENTORY:
-				Intent intent1 = new Intent(getActivity(),
-						InventorySelActivity.class);
-				startActivity(intent1);
-				getActivity().overridePendingTransition(
-						R.anim.base_slide_right_in, R.anim.base_slide_remain);
-				break;
-			case READ:
-				Intent intent = new Intent(getActivity(),
-						EqptReadActivity.class);
-				startActivity(intent);
-				getActivity().overridePendingTransition(
-						R.anim.base_slide_right_in, R.anim.base_slide_remain);
-				break;
-			}
-		};
-	};
+
 	private String typeID;
 
 	@Override
@@ -132,11 +109,6 @@ public class BusinessFragment extends BaseFragment implements
 		roomDao = RoomDao.getInstance(getActivity());
 		inventoryDao = InventoryDao.getInstance(getActivity());
 		uploadInventoryDao = UploadInventoryDao.getInstance(getActivity());
-		//变量初始化
-		Application app = getActivity().getApplication();
-		myapp = (SysApplication) app;
-		myapp.spf = new SPconfig(getActivity());
-		readRFID = new ReadRFID(myapp);
 	}
 
 	@Override
@@ -156,31 +128,35 @@ public class BusinessFragment extends BaseFragment implements
 				ToastUtils.showToast(getActivity(), "请先下载数据");
 				return;
 			}
-			ThreadUtils.runInBackground(new Runnable() {
-
-				@Override
-				public void run() {
-					readRFID.initReader();
-					handler.sendEmptyMessage(INVENTORY);
-				}
-			});
+			if(!MyUtils.isFastDoubleClick()) {
+				Intent intent1 = new Intent(getActivity(),
+						InventorySelActivity.class);
+				startActivity(intent1);
+				getActivity().overridePendingTransition(
+						R.anim.base_slide_right_in, R.anim.base_slide_remain);
+			}
 			break;
 		case 1: // 读取
 			if (eqptDao.getSize() < 0 || eqptDao.getSize() == 0) {
 				ToastUtils.showToast(getActivity(), "请先下载数据");
 				return;
 			}
-			ThreadUtils.runInBackground(new Runnable() {
-
-				@Override
-				public void run() {
-					readRFID.initReader();
-					handler.sendEmptyMessage(READ);
-				}
-			});
+			if(!MyUtils.isFastDoubleClick()){
+				Intent intent = new Intent(getActivity(),
+						EqptReadActivity.class);
+				startActivity(intent);
+				getActivity().overridePendingTransition(
+						R.anim.base_slide_right_in, R.anim.base_slide_remain);
+			}
 			break;
 		case 2: // 查找
-
+			if(!MyUtils.isFastDoubleClick()){
+				Intent intent = new Intent(getActivity(),
+						SerachListActivity.class);
+				startActivity(intent);
+				getActivity().overridePendingTransition(
+						R.anim.base_slide_right_in, R.anim.base_slide_remain);
+			}
 			break;
 //		case 3: // 核检
 //

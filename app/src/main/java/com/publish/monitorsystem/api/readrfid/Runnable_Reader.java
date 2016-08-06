@@ -1,7 +1,9 @@
 package com.publish.monitorsystem.api.readrfid;
 
+import android.os.SystemClock;
 import android.util.Log;
 
+import com.msystemlib.utils.LogUtils;
 import com.pow.api.cls.RfidPower.PDATYPE;
 import com.publish.monitorsystem.application.SysApplication;
 import com.uhf.api.cls.Reader;
@@ -52,7 +54,6 @@ public class Runnable_Reader implements Runnable{
 								e.printStackTrace();
 							}
 						}
-
 						er = myapp.Mreader.GetNextTag(tfs);
 						if (er == READER_ERR.MT_HARDWARE_ALERT_ERR_BY_TOO_MANY_RESET) {
 							if(iRunneableReader != null){
