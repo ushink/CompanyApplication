@@ -34,7 +34,6 @@ public class EqptBean implements Serializable{
 		public String LangChaoBianHao;
 		public String TagID;
 		public String EPC;
-
 		@Override
 		public boolean equals (Object o) {
 			if (this == o) return true;
@@ -87,6 +86,10 @@ public class EqptBean implements Serializable{
 			if (Remark != null ? !Remark.equals(eqpt.Remark) : eqpt.Remark != null) return false;
 			if (CreateTime != null ? !CreateTime.equals(eqpt.CreateTime) : eqpt.CreateTime != null)
 				return false;
+			if (ContractName != null ? !ContractName.equals(eqpt.ContractName) : eqpt.ContractName != null)
+				return false;
+			if (LangChaoBianHao != null ? !LangChaoBianHao.equals(eqpt.LangChaoBianHao) : eqpt.LangChaoBianHao != null)
+				return false;
 			if (TagID != null ? !TagID.equals(eqpt.TagID) : eqpt.TagID != null) return false;
 			return EPC != null ? EPC.equals(eqpt.EPC) : eqpt.EPC == null;
 
@@ -118,6 +121,8 @@ public class EqptBean implements Serializable{
 			result = 31 * result + (State != null ? State.hashCode() : 0);
 			result = 31 * result + (Remark != null ? Remark.hashCode() : 0);
 			result = 31 * result + (CreateTime != null ? CreateTime.hashCode() : 0);
+			result = 31 * result + (ContractName != null ? ContractName.hashCode() : 0);
+			result = 31 * result + (LangChaoBianHao != null ? LangChaoBianHao.hashCode() : 0);
 			result = 31 * result + (TagID != null ? TagID.hashCode() : 0);
 			result = 31 * result + (EPC != null ? EPC.hashCode() : 0);
 			return result;

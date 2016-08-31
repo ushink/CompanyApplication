@@ -274,6 +274,8 @@ public class InventoryEqptDao{
 						.getColumnIndex("TagID"));
 				eqpt.EPC = cursor.getString(cursor
 						.getColumnIndex("EPC"));
+				eqpt.LangChaoBianHao = cursor.getString(cursor.getColumnIndex("LangChaoBianHao"));
+				eqpt.ContractName = cursor.getString(cursor.getColumnIndex("ContractName"));
 				list.add(eqpt);
 				eqpt = null;
 			}
@@ -350,6 +352,8 @@ public class InventoryEqptDao{
 						.getColumnIndex("TagID"));
 				eqpt.EPC = cursor.getString(cursor
 						.getColumnIndex("EPC"));
+				eqpt.LangChaoBianHao = cursor.getString(cursor.getColumnIndex("LangChaoBianHao"));
+				eqpt.ContractName = cursor.getString(cursor.getColumnIndex("ContractName"));
 				list.add(eqpt);
 				eqpt = null;
 			}

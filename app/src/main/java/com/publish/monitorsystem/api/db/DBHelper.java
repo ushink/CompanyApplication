@@ -78,8 +78,8 @@ public class DBHelper extends SQLiteOpenHelper {
 		sql.append("Remark varchar(100),");
 		sql.append("CreateTime varchar(100),");
 		sql.append("TagID varchar(100) primary key,");
-		sql.append("LangChaoBianHao varchar(100) primary key,");
-		sql.append("ContractName varchar(100) primary key,");
+		sql.append("LangChaoBianHao varchar(100),");
+		sql.append("ContractName varchar(100),");
 		sql.append("EPC varchar(100)");
 		sql.append(");");
 		db.execSQL(sql.toString());

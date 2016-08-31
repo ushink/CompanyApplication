@@ -111,6 +111,7 @@ public class InventoryhandActivity extends BaseActivity{
 	private ImageLoader imageLoader;
 	private String planID;
 	private String functionID;
+	private String InventoryFlag;
 
 	@Override
 	public int bindLayout() {
@@ -156,7 +157,17 @@ public class InventoryhandActivity extends BaseActivity{
 		planID = intent.getStringExtra("planID");
 		roomID = intent.getStringExtra("roomID");
 		functionID = intent.getStringExtra("functionID");
+		InventoryFlag = intent.getStringExtra("InventoryFlag");
 		//view层初始化
+
+		if("1".equals(InventoryFlag)){
+			tv_readstatue.setText("已读取到");
+			tv_readstatue.setTextColor(Color.BLACK);
+		}else if("0".equals(InventoryFlag)){
+			tv_readstatue.setText("未读取到");
+			tv_readstatue.setTextColor(Color.RED);
+		}
+
 		if("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
 			tv_eqpt_code.setText(eqpt.EquipmentCode);
 			tv_eqpt_name.setText(eqpt.EquipmentName);

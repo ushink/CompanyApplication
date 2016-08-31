@@ -21,8 +21,9 @@ public class Const {
 	
 	//服务器相关
 	public static final String URL = "http://192.168.25.123:7001/RSWebService.asmx";
-//	public static final String URL = "http://192.168.1.220:7001/RSWebService.asmx";
 	public static final String URL_IMG = "http://192.168.25.123:7002";
+//	public static final String URL = "http://192.168.1.50:7003/RSWebService.asmx";
+//	public static final String URL_IMG = "http://192.168.1.50:7002";
 	public static final String NAMESPACE = "http://tempuri.org/";
 	public static final String TESTCONNECT = "TestConnect";
 	public static final String GETLOGINUSERLIST = "GetLoginUserList";//得到用户列表

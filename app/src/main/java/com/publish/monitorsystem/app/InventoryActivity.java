@@ -354,12 +354,16 @@ public class InventoryActivity extends BaseActivity {
 						vh.tv_equipmentName.setTextColor(Color.BLACK);
 						vh.tv_equipmentPosition.setTextColor(Color.BLACK);
 						vh.tv_departmentName.setTextColor(Color.BLACK);
+						vh.tv_LCCode.setTextColor(Color.BLACK);
+						vh.tv_contractName.setTextColor(Color.BLACK);
 						view.setClickable(false);
 					}else{
 						vh.tv_equipmentCode.setTextColor(Color.RED);
 						vh.tv_equipmentName.setTextColor(Color.RED);
 						vh.tv_equipmentPosition.setTextColor(Color.RED);
 						vh.tv_departmentName.setTextColor(Color.RED);
+						vh.tv_LCCode.setTextColor(Color.RED);
+						vh.tv_contractName.setTextColor(Color.RED);
 					}
 				}else if("3".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
 					ViewHolder vh;
@@ -404,8 +408,8 @@ public class InventoryActivity extends BaseActivity {
 					int arg2, long arg3) {
 
 				if(!btnStop.isEnabled()){
-//					if ((arg2 + 1) < size
-//							|| (arg2 + 1) == size) {
+					if ((arg2 + 1) < size
+							|| (arg2 + 1) == size) {
 						Eqpt eqpt = inventoryEqptlist.get(arg2);
 						Intent intent = new Intent(InventoryActivity.this,
 								InventoryhandActivity.class);
@@ -413,10 +417,23 @@ public class InventoryActivity extends BaseActivity {
 						intent.putExtra("planID", planID);
 						intent.putExtra("roomID", roomID);
 						intent.putExtra("functionID", "1");
+						intent.putExtra("InventoryFlag","0");
 						startActivity(intent);
 						overridePendingTransition(R.anim.base_slide_right_in,
 								R.anim.base_slide_remain);
-//					}
+					}else{
+						Eqpt eqpt = inventoryEqptlist.get(arg2);
+						Intent intent = new Intent(InventoryActivity.this,
+								InventoryhandActivity.class);
+						intent.putExtra("eqpt", eqpt);
+						intent.putExtra("planID", planID);
+						intent.putExtra("roomID", roomID);
+						intent.putExtra("functionID", "1");
+						intent.putExtra("InventoryFlag","1");
+						startActivity(intent);
+						overridePendingTransition(R.anim.base_slide_right_in,
+								R.anim.base_slide_remain);
+					}
 				}
 			}
 		});
