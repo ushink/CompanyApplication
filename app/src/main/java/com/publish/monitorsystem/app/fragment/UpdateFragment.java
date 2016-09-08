@@ -45,6 +45,7 @@ import com.msystemlib.utils.SDUtils;
 import com.msystemlib.utils.SPUtils;
 import com.msystemlib.utils.ThreadUtils;
 import com.msystemlib.utils.ToastUtils;
+import com.msystemlib.view.CustomDialog;
 import com.publish.monitorsystem.R;
 import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.BuildingBean;
@@ -89,6 +90,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	private String[] names;
 	private int [] imageIds;
 	private int i;
+	private FinalHttp fh = new FinalHttp();
 	
 	private EqptDao eqptDao;
 	private InventoryDao inventoryDao;
@@ -121,6 +123,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	private int size;//上传数据总数
 	private int uploadCount;//上传进度参数
 	private int index;//总页数
+	private int mCount;
 	private int in;
 	
 	private final int FLUSH = 102;//测试连接刷新状态
@@ -197,6 +200,8 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	private List<Building> buildingList;
 	private List<Room> roomList;
 	private List<InventoryEqpt> inventoryEqptList;
+	private CustomDialog customDialog;
+
 	@Override
 	public View initView() {
 		View view = View.inflate(getActivity(), R.layout.fragment_update, null);
@@ -300,6 +305,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						dialog.dismiss();
+
 						downloadDialog = showDownloadDialog(getActivity(), "正在准备下载...", "已下载 ：0/ 共0条", i);
 						downloadDialog.show();
 						properties = new HashMap<String, String>();
@@ -794,6 +800,10 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			downloadDialog.dismiss();
 			addCount = 0;
 			i = 0;
+			temp.clear();
+		for (Eqpt eqpt : eqptDao.getAllEqptList()){
+			temp.add(eqpt.ImageName);
+		}
 			if(!"".equals(eqptBeanList.get(0).ImageName)){//判断是否为营具系统
 
 				for (Eqpt eqpt : eqptDao.getAllEqptList()){
@@ -805,6 +815,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 					public void run() {
 						downloadDialog = showDownloadDialog(getActivity(), "正在下载图片", "已下载 ：0/ 共"+temp.size()+"条", i);
 						downloadDialog.show();
+						customDialog = AlertUtils.dialog2(getActivity(), "提示", "营具同步成功！", new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick (DialogInterface dialog, int which) {
+								dialog.dismiss();
+							}
+						}, null);
 						downLoadFile(getActivity(),Const.URL_IMG +"/" + temp.get(addCount),temp.get(addCount));
 					}
 				});
@@ -833,11 +850,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 
 					}
 				});
-
 			}
-
-
-
 		}
 	}
 
@@ -845,12 +858,12 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	 * 从服务器中下载文件
 	 */
 	private void downLoadFile(final Context mContext,final String downURL,String name) {
-		FinalHttp fh = new FinalHttp();
 		String status = Environment.getExternalStorageState();
 		if (status.equals(Environment.MEDIA_MOUNTED)) {
 			if(SDUtils.getSDFreeSize()>10){//判断内存卡大小
 				File file=new File(FileUtils.gainSDCardPath() +"/IMGcache/" + name);
 				if(file.exists()){
+					mCount = 0;
 					addCount ++;
 					handler.sendEmptyMessage(DOWNLOADIMG);
 					if(addCount < temp.size()){//迭代下载每一张图片
@@ -859,22 +872,20 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 						downloadDialog.dismiss();
 						addCount = 0;
 						i = 0;
-						AlertUtils.dialog1(getActivity(), "提示", "营具同步成功！", new DialogInterface.OnClickListener() {
-
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								dialog.dismiss();
-							}
-						}, null);
+						customDialog.show();
 					}
 				}else{
+
 					fh.download(downURL, FileUtils.gainSDCardPath() +"/IMGcache/" + name,new AjaxCallBack<File>() {
-						@Override
-						public void onLoading(long count, long current) {
-						}
 
 						@Override
+						public void onLoading(long count, long current) {
+
+						}
+						@Override
 						public void onSuccess(File t) {
+							System.out.println(downURL);
+							mCount = 0;
 							addCount ++;
 							handler.sendEmptyMessage(DOWNLOADIMG);//下载成功修改下载进度
 							if(addCount < temp.size()){
@@ -883,13 +894,28 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 								downloadDialog.dismiss();
 								addCount = 0;
 								i = 0;
-								AlertUtils.dialog1(getActivity(), "提示", "营具同步成功！", new DialogInterface.OnClickListener() {
+								customDialog.show();
+							}
+						}
 
-									@Override
-									public void onClick(DialogInterface dialog, int which) {
-										dialog.dismiss();
-									}
-								}, null);
+
+						@Override
+						public void onFailure (Throwable t, String strMsg) {
+							System.out.println("onFailure:" + mCount);
+							mCount++;
+							if(mCount == 2){
+								mCount = 0;
+								System.out.println("onFailure:" + downURL);
+								addCount ++;
+								handler.sendEmptyMessage(DOWNLOADIMG);//下载失败修改下载进度
+								if(addCount < temp.size()){
+									downLoadFile(getActivity(),Const.URL_IMG +"/" + temp.get(addCount),temp.get(addCount));
+								}else{
+									downloadDialog.dismiss();
+									addCount = 0;
+									i = 0;
+									customDialog.show();
+								}
 							}
 						}
 					});

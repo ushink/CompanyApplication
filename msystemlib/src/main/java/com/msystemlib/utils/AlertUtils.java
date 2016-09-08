@@ -236,6 +236,21 @@ public class AlertUtils {
         dialogBuilder.create();
         return dialogBuilder.show();
     }
+
+	public static CustomDialog dialog2(Context context,String title,String msg, OnClickListener okBtnListenner,OnClickListener cancelBtnListenner) {
+		com.msystemlib.view.CustomDialog.Builder dialogBuilder = new CustomDialog.Builder(context);
+		if(StringUtils.isNoBlankAndNoNull(title)){
+			dialogBuilder.setTitle(title);
+		}
+		dialogBuilder.setMessage(msg);
+		if(null != okBtnListenner){
+			dialogBuilder.setPositiveButton(android.R.string.ok, okBtnListenner);
+		}
+		if(null != cancelBtnListenner){
+			dialogBuilder.setNegativeButton(android.R.string.cancel, cancelBtnListenner);
+		}
+		return dialogBuilder.create();
+	}
     
     /**
      * 弹出一个自定义布局对话框
