@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -73,12 +75,14 @@ public class EqptReadActivity extends BaseActivity {
 
 	@InjectView(R.id.lv_eqptread)
 	ListView listView;
-
+	private Timer mTimer;
+	private TimerTask mTimerTask;
 	private ImageLoader imageLoader;
 	private EqptDao eqptDao;
 	Map<String, TAGINFO> Devaddrs = new LinkedHashMap<String, TAGINFO>();// 有序
 	private SoundPool soundPool;
 	private final int CLICK = 80;
+	private final int FRUSH = 81;
 	private SysApplication myapp;
 	private Handler handler = new Handler(){
 		@Override
@@ -86,6 +90,9 @@ public class EqptReadActivity extends BaseActivity {
 			switch (msg.what){
 				case CLICK:
 					initClick();
+					break;
+				case FRUSH:
+					showlist();
 					break;
 			}
 		}
@@ -100,14 +107,14 @@ public class EqptReadActivity extends BaseActivity {
 			@Override
 			public void onClick(View arg0) {
 				try {
-
+					startTimer();
 					if (myapp.ThreadMODE == 0){
 						handler.postDelayed(runnable, 0);
 						runnable.setOnReadListener(new IRunneableReaderListener() {
 
 							@Override
 							public void setView() {
-								showlist();
+
 							}
 
 							@Override
@@ -150,7 +157,6 @@ public class EqptReadActivity extends BaseActivity {
 							}
 						});
 					}
-					myapp.Devaddrs.clear();
 					ReadHandleUI();
 				} catch (Exception ex) {
 					Toast.makeText(EqptReadActivity.this,
@@ -165,6 +171,7 @@ public class EqptReadActivity extends BaseActivity {
 			@SuppressWarnings("unused")
 			@Override
 			public void onClick(View arg0) {
+				stopTimer();
 				if (myapp.ThreadMODE == 0)
 					handler.removeCallbacks(runnable);
 
@@ -245,6 +252,9 @@ public class EqptReadActivity extends BaseActivity {
 					eqptList.add(eqpt);
 				}
 			}
+		}
+		if(eqptList == null || eqptList.size() == 0){
+			return;
 		}
 //		MyUtils.removeDuplicate(eqptList);
 		if ("1".equals(SysApplication.gainData(Const.TYPEID).toString().trim())) {
@@ -335,19 +345,19 @@ public class EqptReadActivity extends BaseActivity {
 				@Override
 				public View getView (int position, View convertView, ViewGroup parent) {
 					View view;
-					ViewHolder1 vh;
+					ViewHolder2 vh;
 					if (convertView == null) {
 						view = getLayoutInflater()
 								.inflate(R.layout.listitemview_inv_1,
 										parent, false);
-						vh = new ViewHolder1(view);
+						vh = new ViewHolder2(view);
 						view.setTag(vh);
 					} else {
 						view = convertView;
-						vh = (ViewHolder1) view.getTag();
+						vh = (ViewHolder2) view.getTag();
 					}
 					Eqpt eqpt = eqptList.get(position);
-					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("条码编号：\n" + eqpt.EquipmentCode));
 					vh.tv_equipmentName
 							.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
 					vh.tv_departmentName.setText(MyUtils.ToDBC("物理位置：\n" + eqpt.EquipmentPosition));
@@ -421,6 +431,31 @@ public class EqptReadActivity extends BaseActivity {
 		}
 	}
 
+	static class ViewHolder2 {
+		@InjectView(R.id.tv_equipmentCode)
+		TextView tv_equipmentCode;
+		@InjectView(R.id.tv_equipmentName)
+		TextView tv_equipmentName;
+
+		@InjectView(R.id.tv_equipmentPosition)
+		TextView tv_equipmentPosition;
+		@InjectView(R.id.tv_departmentName)
+		TextView tv_departmentName;
+
+		@InjectView(R.id.tv_usePerson)
+		TextView tv_usePerson;
+		@InjectView(R.id.iv)
+		ImageView iv;
+		@InjectView(R.id.iv_line1)
+		ImageView iv_line1;
+		@InjectView(R.id.iv_line)
+		ImageView iv_line;
+
+		public ViewHolder2(View view) {
+			ButterKnife.inject(this, view);
+		}
+	}
+
 	/**
 	 * 读取时按钮切换
 	 */
@@ -434,13 +469,50 @@ public class EqptReadActivity extends BaseActivity {
 	private void StopHandleUI() {
 		this.btnStart.setEnabled(true);
 		this.btnStop.setEnabled(false);
+		ThreadUtils.runInBackground(new Runnable() {
+			@Override
+			public void run () {
+				SystemClock.sleep(2000);
+				handler.sendEmptyMessage(FRUSH);
+			}
+		});
 	}
 
 	@Override
 	public void resume() {
 
 	}
+	private void startTimer(){
+		if (mTimer == null) {
+			mTimer = new Timer();
+		}
 
+		if (mTimerTask == null) {
+			mTimerTask = new TimerTask() {
+				@Override
+				public void run() {
+					handler.sendEmptyMessage(FRUSH);
+				}
+			};
+		}
+
+		if(mTimer != null && mTimerTask != null )
+			mTimer.schedule(mTimerTask, 3 * 1000, 3 *1000);
+
+	}
+
+	private void stopTimer(){
+
+		if (mTimer != null) {
+			mTimer.cancel();
+			mTimer = null;
+		}
+
+		if (mTimerTask != null) {
+			mTimerTask.cancel();
+			mTimerTask = null;
+		}
+	}
 	@Override
 	public void destroy() {
 		readRFID.colseReader();

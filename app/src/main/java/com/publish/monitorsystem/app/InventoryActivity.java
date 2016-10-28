@@ -274,6 +274,9 @@ public class InventoryActivity extends BaseActivity {
 			public void run () {
 				planID = inventoryDao.getInventoryPlanID1(planIDparam);
 				roomID = roomDao.getRoomID(roomIDparam);
+				if(null==roomID){
+					roomID = "";
+				}
 				parentPlanID = inventoryEqptDao.getParentPlanID(planID);
 				inventoryID = uploadInventoryDao.getAllUploadInventory().get(0).InventoryID;
 				SPUtils.saveString(InventoryActivity.this, "ParentPlanID", parentPlanID);
@@ -378,7 +381,7 @@ public class InventoryActivity extends BaseActivity {
 						vh = (ViewHolder) view.getTag();
 					}
 					Eqpt eqpt = inventoryEqptlist.get(position);
-					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("条码编号：\n" + eqpt.EquipmentCode));
 					vh.tv_equipmentName
 							.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
 					vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：\n" + eqpt.EquipmentPosition));

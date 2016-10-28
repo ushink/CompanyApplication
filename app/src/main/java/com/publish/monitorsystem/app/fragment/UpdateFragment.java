@@ -403,7 +403,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 										getBuildingAndRoom(string + "&" + 1);
 									}else{
 										downloadDialog.dismiss();
-										ToastUtils.showToast(getActivity(), "未制定盘点计划");
+										ToastUtils.showToast(getActivity(), "还有设备未分配到子计划中！");
 									}
 								}
 							}
@@ -441,7 +441,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 				String jsonArray = FormatJsonUtils.formatJson(uploadInventory);
 				size = uploadInventoryEqptDao.getSize();
 				pageInventoryEqpt = uploadInventoryEqptDao.getPageInventoryEqpt(pageSize, 0);
-				index = size % pageSize != 0 ? (size / pageSize + 1) : size / pageSize;
+				index = size % pageSize != 0 ? (size / pageSize  + 1) : size / pageSize;
 				properties = new HashMap<String, String>();
 				properties.put("strJson", jsonArray);
 				tvPro.setText("已上传 ：0/ 共"+ size +"条");

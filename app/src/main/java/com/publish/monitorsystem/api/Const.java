@@ -20,8 +20,8 @@ public class Const {
 	public static final String DB_NAME = "MonitoringSystem.db";
 	
 	//服务器相关
-	public static final String URL = "http://192.168.25.123:7001/RSWebService.asmx";
-	public static final String URL_IMG = "http://192.168.25.123:7002";
+	public static final String URL = "http://192.168.5.1:7001/RSWebService.asmx";
+	public static final String URL_IMG = "http://192.168.5.1:7002";
 //	public static final String URL = "http://192.168.1.50:7003/RSWebService.asmx";
 //	public static final String URL_IMG = "http://192.168.1.50:7002";
 	public static final String NAMESPACE = "http://tempuri.org/";

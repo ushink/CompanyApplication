@@ -26,6 +26,7 @@ import com.msystemlib.utils.LogUtils;
 import com.msystemlib.utils.ThreadUtils;
 import com.pow.api.cls.RfidPower.PDATYPE;
 import com.publish.monitorsystem.R;
+import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.EqptBean.Eqpt;
 import com.publish.monitorsystem.api.db.dao.EqptDao;
 import com.publish.monitorsystem.api.db.dao.InventoryEqptDao;
@@ -248,7 +249,11 @@ public class SearchActivity extends BaseActivity {
 					vh = (ViewHolder1) view.getTag();
 				}
 				Eqpt eqpt = inventoryEqptlist.get(position);
-				vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
+				if("3".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("资产编号：\n" + eqpt.EquipmentCode));
+				}else{
+					vh.tv_equipmentCode.setText(MyUtils.ToDBC("条码编号：\n" + eqpt.EquipmentCode));
+				}
 				vh.tv_equipmentName
 						.setText(MyUtils.ToDBC("资产名称：\n" + eqpt.EquipmentName));
 				vh.tv_equipmentPosition.setText(MyUtils.ToDBC("物理位置：\n" + eqpt.EquipmentPosition));
@@ -353,7 +358,7 @@ public class SearchActivity extends BaseActivity {
 		}
 
 		if(mTimer != null && mTimerTask != null )
-			mTimer.schedule(mTimerTask, 10 * 1000, 10 *1000);
+			mTimer.schedule(mTimerTask, 3 * 1000, 3 *1000);
 
 	}
 
