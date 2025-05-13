@@ -123,20 +123,20 @@ public class InventoryDao{
 					new String[] { FunctionID + "" }, null, null, null);
 			while (cursor.moveToNext()) {
 				inventory = bean.new Inventory();
-				inventory.PlanID = cursor.getString(cursor
-						.getColumnIndex("PlanID"));
-				inventory.ParentPlanID = cursor.getString(cursor
-						.getColumnIndex("ParentPlanID"));
-				inventory.TypeID = cursor.getString(cursor
-						.getColumnIndex("TypeID"));
-				inventory.FunctionID = cursor.getString(cursor
-						.getColumnIndex("FunctionID"));
-				inventory.PlanName = cursor.getString(cursor
-						.getColumnIndex("PlanName"));
-				inventory.BeginTimeTrue = cursor.getString(cursor
-						.getColumnIndex("BeginTimeTrue"));
-				inventory.EndTimeTrue = cursor.getString(cursor
-						.getColumnIndex("EndTimeTrue"));
+				int idxPlanID = cursor.getColumnIndex("PlanID");
+				int idxParentPlanID = cursor.getColumnIndex("ParentPlanID");
+				int idxTypeID = cursor.getColumnIndex("TypeID");
+				int idxFunctionID = cursor.getColumnIndex("FunctionID");
+				int idxPlanName = cursor.getColumnIndex("PlanName");
+				int idxBeginTimeTrue = cursor.getColumnIndex("BeginTimeTrue");
+				int idxEndTimeTrue = cursor.getColumnIndex("EndTimeTrue");
+				if (idxPlanID != -1) inventory.PlanID = cursor.getString(idxPlanID);
+				if (idxParentPlanID != -1) inventory.ParentPlanID = cursor.getString(idxParentPlanID);
+				if (idxTypeID != -1) inventory.TypeID = cursor.getString(idxTypeID);
+				if (idxFunctionID != -1) inventory.FunctionID = cursor.getString(idxFunctionID);
+				if (idxPlanName != -1) inventory.PlanName = cursor.getString(idxPlanName);
+				if (idxBeginTimeTrue != -1) inventory.BeginTimeTrue = cursor.getString(idxBeginTimeTrue);
+				if (idxEndTimeTrue != -1) inventory.EndTimeTrue = cursor.getString(idxEndTimeTrue);
 				list.add(inventory);
 				inventory = null;
 			}
@@ -159,20 +159,20 @@ public class InventoryDao{
 			Cursor cursor = database.query(TABLE_NAME, null, "TypeID = ? and FunctionID = ?",
 					new String[] { typeId, Function}, null, null, null);
 			if (cursor.moveToNext()) {
-				inventory.PlanID = cursor.getString(cursor
-						.getColumnIndex("PlanID"));
-				inventory.ParentPlanID = cursor.getString(cursor
-						.getColumnIndex("ParentPlanID"));
-				inventory.TypeID = cursor.getString(cursor
-						.getColumnIndex("TypeID"));
-				inventory.FunctionID = cursor.getString(cursor
-						.getColumnIndex("FunctionID"));
-				inventory.PlanName = cursor.getString(cursor
-						.getColumnIndex("PlanName"));
-				inventory.BeginTimeTrue = cursor.getString(cursor
-						.getColumnIndex("BeginTimeTrue"));
-				inventory.EndTimeTrue = cursor.getString(cursor
-						.getColumnIndex("EndTimeTrue"));
+				int idxPlanID = cursor.getColumnIndex("PlanID");
+				int idxParentPlanID = cursor.getColumnIndex("ParentPlanID");
+				int idxTypeID = cursor.getColumnIndex("TypeID");
+				int idxFunctionID = cursor.getColumnIndex("FunctionID");
+				int idxPlanName = cursor.getColumnIndex("PlanName");
+				int idxBeginTimeTrue = cursor.getColumnIndex("BeginTimeTrue");
+				int idxEndTimeTrue = cursor.getColumnIndex("EndTimeTrue");
+				if (idxPlanID != -1) inventory.PlanID = cursor.getString(idxPlanID);
+				if (idxParentPlanID != -1) inventory.ParentPlanID = cursor.getString(idxParentPlanID);
+				if (idxTypeID != -1) inventory.TypeID = cursor.getString(idxTypeID);
+				if (idxFunctionID != -1) inventory.FunctionID = cursor.getString(idxFunctionID);
+				if (idxPlanName != -1) inventory.PlanName = cursor.getString(idxPlanName);
+				if (idxBeginTimeTrue != -1) inventory.BeginTimeTrue = cursor.getString(idxBeginTimeTrue);
+				if (idxEndTimeTrue != -1) inventory.EndTimeTrue = cursor.getString(idxEndTimeTrue);
 			}
 		} catch (Exception e) {
 			System.out.println("----getAllUserLogList-->" + e.getMessage());
@@ -192,7 +192,8 @@ public class InventoryDao{
 			Cursor cursor = database.query(TABLE_NAME, new String[]{"PlanID"}, "PlanName like ?",
 					new String[] { "%"+planName+"%" }, null, null, null);
 			if (cursor.moveToNext()) {
-				str = cursor.getString(cursor.getColumnIndex("PlanID"));
+				int idxPlanID = cursor.getColumnIndex("PlanID");
+				if (idxPlanID != -1) str = cursor.getString(idxPlanID);
 			}
 		} catch (Exception e) {
 			System.out.println("----getAllUserLogList-->" + e.getMessage());
@@ -212,7 +213,8 @@ public class InventoryDao{
 			Cursor cursor = database.query(TABLE_NAME, new String[]{"PlanID"}, "PlanName = ?",
 					new String[] { planName}, null, null, null);
 			if (cursor.moveToNext()) {
-				str = cursor.getString(cursor.getColumnIndex("PlanID"));
+				int idxPlanID = cursor.getColumnIndex("PlanID");
+				if (idxPlanID != -1) str = cursor.getString(idxPlanID);
 			}
 		} catch (Exception e) {
 			System.out.println("----getAllUserLogList-->" + e.getMessage());

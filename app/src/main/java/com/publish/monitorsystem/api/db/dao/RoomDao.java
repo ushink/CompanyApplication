@@ -83,14 +83,12 @@ public class RoomDao{
 			Cursor cursor = database.rawQuery(sql, null);
 			while (cursor.moveToNext()) {
 				room = bean.new Room();
-				room.RoomID = cursor.getString(cursor
-						.getColumnIndex("RoomID"));
-				room.BuildingID = cursor.getString(cursor
-						.getColumnIndex("BuildingID"));
-				room.RoomName = cursor.getString(cursor
-						.getColumnIndex("RoomName"));
-				room.ThisFloor = cursor.getString(cursor
-						.getColumnIndex("ThisFloor"));
+				int idxRoomID = cursor.getColumnIndex("RoomID");
+				int idxRoomName = cursor.getColumnIndex("RoomName");
+				int idxBuildingID = cursor.getColumnIndex("BuildingID");
+				if (idxRoomID != -1) room.RoomID = cursor.getString(idxRoomID);
+				if (idxRoomName != -1) room.RoomName = cursor.getString(idxRoomName);
+				if (idxBuildingID != -1) room.BuildingID = cursor.getString(idxBuildingID);
 				list.add(room);
 				room = null;
 			}
@@ -112,7 +110,10 @@ public class RoomDao{
 			Cursor cursor = database.query(TABLE_NAME, new String[]{"RoomID"}, "RoomName = ?",
 					new String[] { roomName }, null, null, null);
 			if (cursor.moveToNext()) {
-				str = cursor.getString(cursor.getColumnIndex("RoomID"));
+				int idxRoomID = cursor.getColumnIndex("RoomID");
+				if (idxRoomID != -1) {
+					str = cursor.getString(idxRoomID);
+				}
 			}
 		} catch (Exception e) {
 			System.out.println("----getAllUserLogList-->" + e.getMessage());

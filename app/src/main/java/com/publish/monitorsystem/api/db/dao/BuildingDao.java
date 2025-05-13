@@ -81,10 +81,14 @@ public class BuildingDao{
 			Cursor cursor = database.rawQuery(sql, null);
 			while (cursor.moveToNext()) {
 				building = bean.new Building();
-				building.BuildingID = cursor.getString(cursor
-						.getColumnIndex("BuildingID"));
-				building.BuildingName = cursor.getString(cursor
-						.getColumnIndex("BuildingName"));
+				int idIndex = cursor.getColumnIndex("BuildingID");
+				int nameIndex = cursor.getColumnIndex("BuildingName");
+				if (idIndex != -1) {
+					building.BuildingID = cursor.getString(idIndex);
+				}
+				if (nameIndex != -1) {
+					building.BuildingName = cursor.getString(nameIndex);
+				}
 				list.add(building);
 				building = null;
 			}

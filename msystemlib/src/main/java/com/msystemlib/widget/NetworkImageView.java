@@ -2,13 +2,13 @@ package com.msystemlib.widget;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
+import androidx.appcompat.widget.AppCompatImageView;
 
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.ImageLoadingListener;
 
-public class NetworkImageView extends ImageView
+public class NetworkImageView extends AppCompatImageView
 {
   private DisplayImageOptions mOptions = new DisplayImageOptions.Builder()
     .cacheInMemory(true)

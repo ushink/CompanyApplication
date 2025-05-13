@@ -26,10 +26,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 import com.msystemlib.base.BaseActivity;
-import com.msystemlib.img.ImgLoad;
 import com.msystemlib.utils.FileUtils;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.pow.api.cls.RfidPower.PDATYPE;
 import com.publish.monitorsystem.R;
 import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.UploadInventoryEqpt;
@@ -43,6 +40,7 @@ import com.publish.monitorsystem.api.readrfid.Runnable_Reader;
 import com.publish.monitorsystem.application.SysApplication;
 import com.uhf.api.cls.Reader.READER_ERR;
 import com.uhf.api.cls.Reader.TAGINFO;
+import com.publish.monitorsystem.utils.ImageUtils;
 
 public class InventoryhandActivity extends BaseActivity{
 	@InjectView(R.id.btn_start)
@@ -108,7 +106,7 @@ public class InventoryhandActivity extends BaseActivity{
 	
 	private String roomID;
 	private Eqpt eqpt;
-	private ImageLoader imageLoader;
+	private ImageUtils imageUtils = ImageUtils.getInstance();
 	private String planID;
 	private String functionID;
 	private String InventoryFlag;
@@ -151,7 +149,6 @@ public class InventoryhandActivity extends BaseActivity{
 		uploadInventoryDao = UploadInventoryDao.getInstance(this);
 		uploadInventoryeqptDao = UploadInventoryEqptDao.getInstance(this);
 		//变量初始化
-		imageLoader = ImgLoad.initImageLoader(InventoryhandActivity.this);
 		Intent intent = getIntent();
 		eqpt = (Eqpt) intent.getSerializableExtra("eqpt");
 		planID = intent.getStringExtra("planID");
@@ -183,7 +180,7 @@ public class InventoryhandActivity extends BaseActivity{
 				tv_eqpt_IsSecret.setText(Integer.parseInt(eqpt.IsSecret) == 0?"非涉密":"涉密");
 			}
 		}else if("2".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
-			imageLoader.displayImage("file://" + FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,iv);
+			imageUtils.loadImage(getApplicationContext(), "file://" + FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,iv);
 			tv_eqpt_code.setText(eqpt.EquipmentCode);
 			tv_eqpt_name.setText(eqpt.EquipmentName);
 			tv_eqpt_EquipmentPosition.setText(eqpt.EquipmentPosition);
@@ -297,7 +294,7 @@ public class InventoryhandActivity extends BaseActivity{
 			@Override
 			public void onClick(View arg0) {
 				handler.removeCallbacks(runnable);
-				if(myapp.Rpower.GetType()==PDATYPE.SCAN_ALPS_ANDROID_CUIUS2)
+				if(false)
 				{
 					try {
 						Thread.sleep(500);

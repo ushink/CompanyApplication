@@ -37,14 +37,10 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 import com.msystemlib.base.BaseActivity;
-import com.msystemlib.img.ImgLoad;
 import com.msystemlib.utils.FileUtils;
 import com.msystemlib.utils.LogUtils;
 import com.msystemlib.utils.SPUtils;
 import com.msystemlib.utils.ThreadUtils;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.PauseOnScrollListener;
-import com.pow.api.cls.RfidPower.PDATYPE;
 import com.publish.monitorsystem.R;
 import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.UploadInventoryEqpt;
@@ -61,6 +57,8 @@ import com.publish.monitorsystem.api.utils.MyUtils;
 import com.publish.monitorsystem.application.SysApplication;
 import com.uhf.api.cls.Reader.READER_ERR;
 import com.uhf.api.cls.Reader.TAGINFO;
+import com.publish.monitorsystem.utils.ImageUtils;
+import android.widget.AbsListView;
 
 public class InventoryActivity extends BaseActivity {
 	@InjectView(R.id.btn_start)
@@ -94,7 +92,7 @@ public class InventoryActivity extends BaseActivity {
 	private SoundPool soundPool;
 	private SysApplication myapp;
 	private Runnable_Reader runnable;
-	private ImageLoader imageLoader;
+	private ImageUtils imageUtils = ImageUtils.getInstance();
 	private String planIDparam;
 	private String roomIDparam;
 	private String planID;
@@ -218,7 +216,7 @@ public class InventoryActivity extends BaseActivity {
 					if (myapp.ThreadMODE == 0)
 						handler.removeCallbacks(runnable);
 
-					if (myapp.Rpower.GetType() == PDATYPE.SCAN_ALPS_ANDROID_CUIUS2) {
+					if (false) {
 						try {
 							Thread.sleep(500);
 						} catch (InterruptedException e) {
@@ -256,7 +254,6 @@ public class InventoryActivity extends BaseActivity {
 		inventoryDao = InventoryDao.getInstance(this);
 		uploadInventoryeqptDao = UploadInventoryEqptDao.getInstance(this);
 		//变量初始化
-		imageLoader = ImgLoad.initImageLoader(InventoryActivity.this);
 		soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
 		soundPool.load(this, R.raw.beep, 1);
 		Application app = getApplication();
@@ -351,7 +348,7 @@ public class InventoryActivity extends BaseActivity {
 					vh.iv_line.setVisibility(View.VISIBLE);
 					vh.tv_LCCode.setText(MyUtils.ToDBC("浪潮编号：\n" + eqpt.LangChaoBianHao));
 					vh.tv_contractName.setText(MyUtils.ToDBC("合同名称：\n" + eqpt.ContractName));
-					imageLoader.displayImage("file://" + FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,vh.iv);
+					imageUtils.loadImage(getApplicationContext(), "file://" + FileUtils.gainSDCardPath() +"/IMGcache/"+eqpt.ImageName,vh.iv);
 					if ((position + 1) > size) {
 						vh.tv_equipmentCode.setTextColor(Color.BLACK);
 						vh.tv_equipmentName.setTextColor(Color.BLACK);
@@ -403,7 +400,17 @@ public class InventoryActivity extends BaseActivity {
 			}
 		};
 		listView.setAdapter(adapter);
-		listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, true, true)); // 设置滚动时不加载图片
+		listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(AbsListView view, int scrollState) {
+				// Handle scroll state changes
+			}
+
+			@Override
+			public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+				// Handle scroll
+			}
+		});
 		listView.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override

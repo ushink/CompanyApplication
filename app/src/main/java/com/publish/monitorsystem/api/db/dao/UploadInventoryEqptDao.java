@@ -103,20 +103,34 @@ public class UploadInventoryEqptDao{
 			Cursor cursor = database.rawQuery(sql, null);
 			while (cursor.moveToNext()) {
 				eqpt = new UploadInventoryEqpt();
-				eqpt.InfoID = cursor.getString(cursor
-						.getColumnIndex("InfoID"));
-				eqpt.PlanID = cursor.getString(cursor
-						.getColumnIndex("PlanID"));
-				eqpt.ParentPlanID = cursor.getString(cursor
-						.getColumnIndex("ParentPlanID"));
-				eqpt.InventoryID = cursor.getString(cursor
-						.getColumnIndex("InventoryID"));
-				eqpt.EquipmentID = cursor.getString(cursor
-						.getColumnIndex("EquipmentID"));
-				eqpt.RoomID = cursor.getString(cursor
-						.getColumnIndex("RoomID"));
-				eqpt.InventoryTime = cursor.getString(cursor
-						.getColumnIndex("InventoryTime"));
+				int idxInfoID = cursor.getColumnIndex("InfoID");
+				if (idxInfoID != -1) {
+					eqpt.InfoID = cursor.getString(idxInfoID);
+				}
+				int idxPlanID = cursor.getColumnIndex("PlanID");
+				if (idxPlanID != -1) {
+					eqpt.PlanID = cursor.getString(idxPlanID);
+				}
+				int idxParentPlanID = cursor.getColumnIndex("ParentPlanID");
+				if (idxParentPlanID != -1) {
+					eqpt.ParentPlanID = cursor.getString(idxParentPlanID);
+				}
+				int idxInventoryID = cursor.getColumnIndex("InventoryID");
+				if (idxInventoryID != -1) {
+					eqpt.InventoryID = cursor.getString(idxInventoryID);
+				}
+				int idxEquipmentID = cursor.getColumnIndex("EquipmentID");
+				if (idxEquipmentID != -1) {
+					eqpt.EquipmentID = cursor.getString(idxEquipmentID);
+				}
+				int idxRoomID = cursor.getColumnIndex("RoomID");
+				if (idxRoomID != -1) {
+					eqpt.RoomID = cursor.getString(idxRoomID);
+				}
+				int idxInventoryTime = cursor.getColumnIndex("InventoryTime");
+				if (idxInventoryTime != -1) {
+					eqpt.InventoryTime = cursor.getString(idxInventoryTime);
+				}
 				list.add(eqpt);
 				eqpt = null;
 			}
@@ -166,20 +180,34 @@ public class UploadInventoryEqptDao{
 			Cursor cursor = database.rawQuery("select * from uploadinventoryeqpt order by EquipmentID limit ? offset ?;", new String[]{"" + pageSize,"" + (pageIndex * pageSize)});
 			while(cursor.moveToNext()){
 				eqpt = new UploadInventoryEqpt();
-				eqpt.InfoID = cursor.getString(cursor
-						.getColumnIndex("InfoID"));
-				eqpt.PlanID = cursor.getString(cursor
-						.getColumnIndex("PlanID"));
-				eqpt.ParentPlanID = cursor.getString(cursor
-						.getColumnIndex("ParentPlanID"));
-				eqpt.InventoryID = cursor.getString(cursor
-						.getColumnIndex("InventoryID"));
-				eqpt.EquipmentID = cursor.getString(cursor
-						.getColumnIndex("EquipmentID"));
-				eqpt.RoomID = cursor.getString(cursor
-						.getColumnIndex("RoomID"));
-				eqpt.InventoryTime = cursor.getString(cursor
-						.getColumnIndex("InventoryTime"));
+				int idxInfoID = cursor.getColumnIndex("InfoID");
+				if (idxInfoID != -1) {
+					eqpt.InfoID = cursor.getString(idxInfoID);
+				}
+				int idxPlanID = cursor.getColumnIndex("PlanID");
+				if (idxPlanID != -1) {
+					eqpt.PlanID = cursor.getString(idxPlanID);
+				}
+				int idxParentPlanID = cursor.getColumnIndex("ParentPlanID");
+				if (idxParentPlanID != -1) {
+					eqpt.ParentPlanID = cursor.getString(idxParentPlanID);
+				}
+				int idxInventoryID = cursor.getColumnIndex("InventoryID");
+				if (idxInventoryID != -1) {
+					eqpt.InventoryID = cursor.getString(idxInventoryID);
+				}
+				int idxEquipmentID = cursor.getColumnIndex("EquipmentID");
+				if (idxEquipmentID != -1) {
+					eqpt.EquipmentID = cursor.getString(idxEquipmentID);
+				}
+				int idxRoomID = cursor.getColumnIndex("RoomID");
+				if (idxRoomID != -1) {
+					eqpt.RoomID = cursor.getString(idxRoomID);
+				}
+				int idxInventoryTime = cursor.getColumnIndex("InventoryTime");
+				if (idxInventoryTime != -1) {
+					eqpt.InventoryTime = cursor.getString(idxInventoryTime);
+				}
 				list.add(eqpt);
 				eqpt = null;
 			}

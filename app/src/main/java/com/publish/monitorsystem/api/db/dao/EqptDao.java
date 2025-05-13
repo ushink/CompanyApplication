@@ -179,55 +179,62 @@ public class EqptDao {
 			Cursor cursor = database.rawQuery(sql, null);
 			while (cursor.moveToNext()) {
 				eqpt = bean.new Eqpt();
-				eqpt.EquipmentID = cursor.getString(cursor
-						.getColumnIndex("EquipmentID"));
-				eqpt.TypeID = cursor.getString(cursor.getColumnIndex("TypeID"));
-				eqpt.TypeName = cursor.getString(cursor
-						.getColumnIndex("TypeName"));
-				eqpt.EquipmentCode = cursor.getString(cursor
-						.getColumnIndex("EquipmentCode"));
-				eqpt.FileCode = cursor.getString(cursor
-						.getColumnIndex("FileCode"));
-				eqpt.ImageName = cursor.getString(cursor
-						.getColumnIndex("ImageName"));
-				eqpt.OutFactoryNum = cursor.getString(cursor
-						.getColumnIndex("OutFactoryNum"));
-				eqpt.ProjectName = cursor.getString(cursor
-						.getColumnIndex("ProjectName"));
-				eqpt.IsSecret = cursor.getString(cursor
-						.getColumnIndex("IsSecret"));
-				eqpt.InitialValue = cursor.getString(cursor
-						.getColumnIndex("InitialValue"));
-				eqpt.EquipmentName = cursor.getString(cursor
-						.getColumnIndex("EquipmentName"));
-				eqpt.Factory = cursor.getString(cursor
-						.getColumnIndex("Factory"));
-				eqpt.FactoryName = cursor.getString(cursor
-						.getColumnIndex("FactoryName"));
-				eqpt.UsePerson = cursor.getString(cursor
-						.getColumnIndex("UsePerson"));
-				eqpt.ManagePerson = cursor.getString(cursor
-						.getColumnIndex("ManagePerson"));
-				eqpt.EquipmentSource = cursor.getString(cursor
-						.getColumnIndex("EquipmentSource"));
-				eqpt.DepartmentID = cursor.getString(cursor
-						.getColumnIndex("DepartmentID"));
-				eqpt.DepartmentName = cursor.getString(cursor
-						.getColumnIndex("DepartmentName"));
-				eqpt.Specification = cursor.getString(cursor
-						.getColumnIndex("Specification"));
-				eqpt.ManufactureDate = cursor.getString(cursor
-						.getColumnIndex("ManufactureDate"));
-				eqpt.EquipmentPosition = cursor.getString(cursor
-						.getColumnIndex("EquipmentPosition"));
-				eqpt.State = cursor.getString(cursor.getColumnIndex("State"));
-				eqpt.Remark = cursor.getString(cursor.getColumnIndex("Remark"));
-				eqpt.CreateTime = cursor.getString(cursor
-						.getColumnIndex("CreateTime"));
-				eqpt.TagID = cursor.getString(cursor.getColumnIndex("TagID"));
-				eqpt.LangChaoBianHao = cursor.getString(cursor.getColumnIndex("LangChaoBianHao"));
-				eqpt.ContractName = cursor.getString(cursor.getColumnIndex("ContractName"));
-				eqpt.EPC = cursor.getString(cursor.getColumnIndex("EPC"));
+				int idxEquipmentID = cursor.getColumnIndex("EquipmentID");
+				int idxTypeID = cursor.getColumnIndex("TypeID");
+				int idxTypeName = cursor.getColumnIndex("TypeName");
+				int idxEquipmentCode = cursor.getColumnIndex("EquipmentCode");
+				int idxFileCode = cursor.getColumnIndex("FileCode");
+				int idxImageName = cursor.getColumnIndex("ImageName");
+				int idxOutFactoryNum = cursor.getColumnIndex("OutFactoryNum");
+				int idxProjectName = cursor.getColumnIndex("ProjectName");
+				int idxIsSecret = cursor.getColumnIndex("IsSecret");
+				int idxInitialValue = cursor.getColumnIndex("InitialValue");
+				int idxEquipmentName = cursor.getColumnIndex("EquipmentName");
+				int idxFactory = cursor.getColumnIndex("Factory");
+				int idxFactoryName = cursor.getColumnIndex("FactoryName");
+				int idxUsePerson = cursor.getColumnIndex("UsePerson");
+				int idxManagePerson = cursor.getColumnIndex("ManagePerson");
+				int idxEquipmentSource = cursor.getColumnIndex("EquipmentSource");
+				int idxDepartmentID = cursor.getColumnIndex("DepartmentID");
+				int idxDepartmentName = cursor.getColumnIndex("DepartmentName");
+				int idxSpecification = cursor.getColumnIndex("Specification");
+				int idxManufactureDate = cursor.getColumnIndex("ManufactureDate");
+				int idxEquipmentPosition = cursor.getColumnIndex("EquipmentPosition");
+				int idxState = cursor.getColumnIndex("State");
+				int idxRemark = cursor.getColumnIndex("Remark");
+				int idxCreateTime = cursor.getColumnIndex("CreateTime");
+				int idxTagID = cursor.getColumnIndex("TagID");
+				int idxLangChaoBianHao = cursor.getColumnIndex("LangChaoBianHao");
+				int idxContractName = cursor.getColumnIndex("ContractName");
+				int idxEPC = cursor.getColumnIndex("EPC");
+				if (idxEquipmentID != -1) eqpt.EquipmentID = cursor.getString(idxEquipmentID);
+				if (idxTypeID != -1) eqpt.TypeID = cursor.getString(idxTypeID);
+				if (idxTypeName != -1) eqpt.TypeName = cursor.getString(idxTypeName);
+				if (idxEquipmentCode != -1) eqpt.EquipmentCode = cursor.getString(idxEquipmentCode);
+				if (idxFileCode != -1) eqpt.FileCode = cursor.getString(idxFileCode);
+				if (idxImageName != -1) eqpt.ImageName = cursor.getString(idxImageName);
+				if (idxOutFactoryNum != -1) eqpt.OutFactoryNum = cursor.getString(idxOutFactoryNum);
+				if (idxProjectName != -1) eqpt.ProjectName = cursor.getString(idxProjectName);
+				if (idxIsSecret != -1) eqpt.IsSecret = cursor.getString(idxIsSecret);
+				if (idxInitialValue != -1) eqpt.InitialValue = cursor.getString(idxInitialValue);
+				if (idxEquipmentName != -1) eqpt.EquipmentName = cursor.getString(idxEquipmentName);
+				if (idxFactory != -1) eqpt.Factory = cursor.getString(idxFactory);
+				if (idxFactoryName != -1) eqpt.FactoryName = cursor.getString(idxFactoryName);
+				if (idxUsePerson != -1) eqpt.UsePerson = cursor.getString(idxUsePerson);
+				if (idxManagePerson != -1) eqpt.ManagePerson = cursor.getString(idxManagePerson);
+				if (idxEquipmentSource != -1) eqpt.EquipmentSource = cursor.getString(idxEquipmentSource);
+				if (idxDepartmentID != -1) eqpt.DepartmentID = cursor.getString(idxDepartmentID);
+				if (idxDepartmentName != -1) eqpt.DepartmentName = cursor.getString(idxDepartmentName);
+				if (idxSpecification != -1) eqpt.Specification = cursor.getString(idxSpecification);
+				if (idxManufactureDate != -1) eqpt.ManufactureDate = cursor.getString(idxManufactureDate);
+				if (idxEquipmentPosition != -1) eqpt.EquipmentPosition = cursor.getString(idxEquipmentPosition);
+				if (idxState != -1) eqpt.State = cursor.getString(idxState);
+				if (idxRemark != -1) eqpt.Remark = cursor.getString(idxRemark);
+				if (idxCreateTime != -1) eqpt.CreateTime = cursor.getString(idxCreateTime);
+				if (idxTagID != -1) eqpt.TagID = cursor.getString(idxTagID);
+				if (idxLangChaoBianHao != -1) eqpt.LangChaoBianHao = cursor.getString(idxLangChaoBianHao);
+				if (idxContractName != -1) eqpt.ContractName = cursor.getString(idxContractName);
+				if (idxEPC != -1) eqpt.EPC = cursor.getString(idxEPC);
 				list.add(eqpt);
 				eqpt = null;
 			}
@@ -251,55 +258,62 @@ public class EqptDao {
 					new String[] { EPC }, null, null, null);
 			if (cursor.moveToNext()) {
 				eqpt = bean.new Eqpt();
-				eqpt.EquipmentID = cursor.getString(cursor
-						.getColumnIndex("EquipmentID"));
-				eqpt.TypeID = cursor.getString(cursor.getColumnIndex("TypeID"));
-				eqpt.TypeName = cursor.getString(cursor
-						.getColumnIndex("TypeName"));
-				eqpt.EquipmentCode = cursor.getString(cursor
-						.getColumnIndex("EquipmentCode"));
-				eqpt.FileCode = cursor.getString(cursor
-						.getColumnIndex("FileCode"));
-				eqpt.ImageName = cursor.getString(cursor
-						.getColumnIndex("ImageName"));
-				eqpt.OutFactoryNum = cursor.getString(cursor
-						.getColumnIndex("OutFactoryNum"));
-				eqpt.ProjectName = cursor.getString(cursor
-						.getColumnIndex("ProjectName"));
-				eqpt.IsSecret = cursor.getString(cursor
-						.getColumnIndex("IsSecret"));
-				eqpt.InitialValue = cursor.getString(cursor
-						.getColumnIndex("InitialValue"));
-				eqpt.EquipmentName = cursor.getString(cursor
-						.getColumnIndex("EquipmentName"));
-				eqpt.Factory = cursor.getString(cursor
-						.getColumnIndex("Factory"));
-				eqpt.FactoryName = cursor.getString(cursor
-						.getColumnIndex("FactoryName"));
-				eqpt.UsePerson = cursor.getString(cursor
-						.getColumnIndex("UsePerson"));
-				eqpt.ManagePerson = cursor.getString(cursor
-						.getColumnIndex("ManagePerson"));
-				eqpt.EquipmentSource = cursor.getString(cursor
-						.getColumnIndex("EquipmentSource"));
-				eqpt.DepartmentID = cursor.getString(cursor
-						.getColumnIndex("DepartmentID"));
-				eqpt.DepartmentName = cursor.getString(cursor
-						.getColumnIndex("DepartmentName"));
-				eqpt.Specification = cursor.getString(cursor
-						.getColumnIndex("Specification"));
-				eqpt.ManufactureDate = cursor.getString(cursor
-						.getColumnIndex("ManufactureDate"));
-				eqpt.EquipmentPosition = cursor.getString(cursor
-						.getColumnIndex("EquipmentPosition"));
-				eqpt.State = cursor.getString(cursor.getColumnIndex("State"));
-				eqpt.Remark = cursor.getString(cursor.getColumnIndex("Remark"));
-				eqpt.CreateTime = cursor.getString(cursor
-						.getColumnIndex("CreateTime"));
-				eqpt.TagID = cursor.getString(cursor.getColumnIndex("TagID"));
-				eqpt.LangChaoBianHao = cursor.getString(cursor.getColumnIndex("LangChaoBianHao"));
-				eqpt.ContractName = cursor.getString(cursor.getColumnIndex("ContractName"));
-				eqpt.EPC = cursor.getString(cursor.getColumnIndex("EPC"));
+				int idxEquipmentID = cursor.getColumnIndex("EquipmentID");
+				int idxTypeID = cursor.getColumnIndex("TypeID");
+				int idxTypeName = cursor.getColumnIndex("TypeName");
+				int idxEquipmentCode = cursor.getColumnIndex("EquipmentCode");
+				int idxFileCode = cursor.getColumnIndex("FileCode");
+				int idxImageName = cursor.getColumnIndex("ImageName");
+				int idxOutFactoryNum = cursor.getColumnIndex("OutFactoryNum");
+				int idxProjectName = cursor.getColumnIndex("ProjectName");
+				int idxIsSecret = cursor.getColumnIndex("IsSecret");
+				int idxInitialValue = cursor.getColumnIndex("InitialValue");
+				int idxEquipmentName = cursor.getColumnIndex("EquipmentName");
+				int idxFactory = cursor.getColumnIndex("Factory");
+				int idxFactoryName = cursor.getColumnIndex("FactoryName");
+				int idxUsePerson = cursor.getColumnIndex("UsePerson");
+				int idxManagePerson = cursor.getColumnIndex("ManagePerson");
+				int idxEquipmentSource = cursor.getColumnIndex("EquipmentSource");
+				int idxDepartmentID = cursor.getColumnIndex("DepartmentID");
+				int idxDepartmentName = cursor.getColumnIndex("DepartmentName");
+				int idxSpecification = cursor.getColumnIndex("Specification");
+				int idxManufactureDate = cursor.getColumnIndex("ManufactureDate");
+				int idxEquipmentPosition = cursor.getColumnIndex("EquipmentPosition");
+				int idxState = cursor.getColumnIndex("State");
+				int idxRemark = cursor.getColumnIndex("Remark");
+				int idxCreateTime = cursor.getColumnIndex("CreateTime");
+				int idxTagID = cursor.getColumnIndex("TagID");
+				int idxLangChaoBianHao = cursor.getColumnIndex("LangChaoBianHao");
+				int idxContractName = cursor.getColumnIndex("ContractName");
+				int idxEPC = cursor.getColumnIndex("EPC");
+				if (idxEquipmentID != -1) eqpt.EquipmentID = cursor.getString(idxEquipmentID);
+				if (idxTypeID != -1) eqpt.TypeID = cursor.getString(idxTypeID);
+				if (idxTypeName != -1) eqpt.TypeName = cursor.getString(idxTypeName);
+				if (idxEquipmentCode != -1) eqpt.EquipmentCode = cursor.getString(idxEquipmentCode);
+				if (idxFileCode != -1) eqpt.FileCode = cursor.getString(idxFileCode);
+				if (idxImageName != -1) eqpt.ImageName = cursor.getString(idxImageName);
+				if (idxOutFactoryNum != -1) eqpt.OutFactoryNum = cursor.getString(idxOutFactoryNum);
+				if (idxProjectName != -1) eqpt.ProjectName = cursor.getString(idxProjectName);
+				if (idxIsSecret != -1) eqpt.IsSecret = cursor.getString(idxIsSecret);
+				if (idxInitialValue != -1) eqpt.InitialValue = cursor.getString(idxInitialValue);
+				if (idxEquipmentName != -1) eqpt.EquipmentName = cursor.getString(idxEquipmentName);
+				if (idxFactory != -1) eqpt.Factory = cursor.getString(idxFactory);
+				if (idxFactoryName != -1) eqpt.FactoryName = cursor.getString(idxFactoryName);
+				if (idxUsePerson != -1) eqpt.UsePerson = cursor.getString(idxUsePerson);
+				if (idxManagePerson != -1) eqpt.ManagePerson = cursor.getString(idxManagePerson);
+				if (idxEquipmentSource != -1) eqpt.EquipmentSource = cursor.getString(idxEquipmentSource);
+				if (idxDepartmentID != -1) eqpt.DepartmentID = cursor.getString(idxDepartmentID);
+				if (idxDepartmentName != -1) eqpt.DepartmentName = cursor.getString(idxDepartmentName);
+				if (idxSpecification != -1) eqpt.Specification = cursor.getString(idxSpecification);
+				if (idxManufactureDate != -1) eqpt.ManufactureDate = cursor.getString(idxManufactureDate);
+				if (idxEquipmentPosition != -1) eqpt.EquipmentPosition = cursor.getString(idxEquipmentPosition);
+				if (idxState != -1) eqpt.State = cursor.getString(idxState);
+				if (idxRemark != -1) eqpt.Remark = cursor.getString(idxRemark);
+				if (idxCreateTime != -1) eqpt.CreateTime = cursor.getString(idxCreateTime);
+				if (idxTagID != -1) eqpt.TagID = cursor.getString(idxTagID);
+				if (idxLangChaoBianHao != -1) eqpt.LangChaoBianHao = cursor.getString(idxLangChaoBianHao);
+				if (idxContractName != -1) eqpt.ContractName = cursor.getString(idxContractName);
+				if (idxEPC != -1) eqpt.EPC = cursor.getString(idxEPC);
 			}
 		} catch (Exception e) {
 			System.out.println("----getAllUserLogList-->" + e.getMessage());

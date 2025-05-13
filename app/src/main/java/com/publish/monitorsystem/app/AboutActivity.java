@@ -11,15 +11,14 @@ import butterknife.InjectView;
 import butterknife.OnClick;
 
 import com.msystemlib.base.BaseActivity;
-import com.msystemlib.img.ImgLoad;
 import com.msystemlib.utils.LogUtils;
-import com.nostra13.universalimageloader.core.ImageLoader;
 import com.publish.monitorsystem.R;
 import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.db.dao.InventoryDao;
 import com.publish.monitorsystem.api.db.dao.InventoryEqptDao;
 import com.publish.monitorsystem.api.db.dao.UploadInventoryEqptDao;
 import com.publish.monitorsystem.application.SysApplication;
+import com.publish.monitorsystem.utils.ImageUtils;
 
 public class AboutActivity extends BaseActivity {
 private InventoryEqptDao eqptDao;
@@ -38,8 +37,7 @@ private SysApplication myapp;
 	public void initView(View view) {
 		
 		ButterKnife.inject(this);
-		ImageLoader imageLoader = ImgLoad.initImageLoader(this);
-		imageLoader.displayImage("drawable://" + R.drawable.logo,iv);
+		ImageUtils.getInstance().loadImage(this, "drawable://" + R.drawable.logo, iv);
 
 	}
 	

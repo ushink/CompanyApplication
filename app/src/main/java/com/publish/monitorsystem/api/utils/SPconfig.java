@@ -244,13 +244,13 @@ public class SPconfig {
 		if(GetString("FILENABLE")!=null&&!GetString("FILENABLE").equals(""))
 		RP.filenable=Integer.valueOf(GetString("FILENABLE"));
 
-		if(GetString("FILENABLE")!=null&&!GetString("FILENABLE").equals(""))
+		if(GetString("EMDADR")!=null&&!GetString("EMDADR").equals(""))
 		RP.emdadr=Integer.valueOf(GetString("EMDADR"));
-		if(GetString("FILENABLE")!=null&&!GetString("FILENABLE").equals(""))
+		if(GetString("EMDBYTEC")!=null&&!GetString("EMDBYTEC").equals(""))
 		RP.emdbytec=Integer.valueOf(GetString("EMDBYTEC"));
-		if(GetString("FILENABLE")!=null&&!GetString("FILENABLE").equals(""))
+		if(GetString("EMDBANK")!=null&&!GetString("EMDBANK").equals(""))
 		RP.emdbank=Integer.valueOf(GetString("EMDBANK"));
-		if(GetString("FILENABLE")!=null&&!GetString("FILENABLE").equals(""))
+		if(GetString("EMDENABLE")!=null&&!GetString("EMDENABLE").equals(""))
 		RP.emdenable=Integer.valueOf(GetString("EMDENABLE"));
 
 		if(GetString("ADATAQ")!=null&&!GetString("ADATAQ").equals(""))

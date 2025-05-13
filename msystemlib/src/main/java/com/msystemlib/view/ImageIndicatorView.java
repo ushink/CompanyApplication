@@ -8,12 +8,13 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -96,14 +97,14 @@ public class ImageIndicatorView extends RelativeLayout {
 	 * 广告位置监听接口
 	 */
 	public interface OnItemChangeListener {
-		void onPosition (int position, int totalCount);
+		void onPosition(int position, int totalCount);
 	}
 
 	/**
 	 * 条目点击事件监听接口
 	 */
 	public interface OnItemClickListener {
-		void OnItemClick (View view, int position);
+		void OnItemClick(View view, int position);
 	}
 
 	public ImageIndicatorView(Context context, AttributeSet attrs) {
@@ -121,15 +122,15 @@ public class ImageIndicatorView extends RelativeLayout {
 	 */
 	private void init(Context context) {
 		LayoutInflater.from(context).inflate(R.layout.view_imageindicator, this);
-		this.viewPager = (ViewPager) findViewById(R.id.view_pager);
-		this.indicateLayout = (LinearLayout) findViewById(R.id.indicater_layout);
-		this.leftButton = (Button) findViewById(R.id.left_button);
-		this.rightButton = (Button) findViewById(R.id.right_button);
+		this.viewPager = findViewById(R.id.view_pager);
+		this.indicateLayout = findViewById(R.id.indicater_layout);
+		this.leftButton = findViewById(R.id.left_button);
+		this.rightButton = findViewById(R.id.right_button);
 
 		this.leftButton.setVisibility(View.GONE);
 		this.rightButton.setVisibility(View.GONE);
 
-		this.viewPager.setOnPageChangeListener(new PageChangeListener());
+		this.viewPager.addOnPageChangeListener(new PageChangeListener());
 
 		final ArrowClickListener arrowClickListener = new ArrowClickListener();
 		this.leftButton.setOnClickListener(arrowClickListener);
@@ -182,7 +183,7 @@ public class ImageIndicatorView extends RelativeLayout {
 	/**
 	 * 条目点击事件监听类
 	 */
-	private class ItemClickListener implements OnClickListener {
+	private class ItemClickListener implements View.OnClickListener {
 		private int position = 0;
 
 		public ItemClickListener(int position) {
@@ -294,7 +295,7 @@ public class ImageIndicatorView extends RelativeLayout {
 	/**
 	 * 箭头点击事件处理
 	 */
-	private class ArrowClickListener implements OnClickListener {
+	private class ArrowClickListener implements View.OnClickListener {
 		@Override
 		public void onClick(View view) {
 			if (view == leftButton) {
@@ -329,7 +330,6 @@ public class ImageIndicatorView extends RelativeLayout {
 
 		@Override
 		public void onPageScrollStateChanged(int arg0) {
-
 		}
 	}
 
@@ -404,23 +404,22 @@ public class ImageIndicatorView extends RelativeLayout {
 
 		@Override
 		public int getItemPosition(Object object) {
-			return super.getItemPosition(object);
+			return POSITION_NONE;
 		}
 
 		@Override
-		public void destroyItem(View arg0, int arg1, Object arg2) {
+		public void destroyItem(ViewGroup arg0, int arg1, Object arg2) {
 			((ViewPager) arg0).removeView(pageViews.get(arg1));
 		}
 
 		@Override
-		public Object instantiateItem(View arg0, int arg1) {
+		public Object instantiateItem(ViewGroup arg0, int arg1) {
 			((ViewPager) arg0).addView(pageViews.get(arg1));
 			return pageViews.get(arg1);
 		}
 
 		@Override
 		public void restoreState(Parcelable arg0, ClassLoader arg1) {
-
 		}
 
 		@Override
@@ -429,16 +428,13 @@ public class ImageIndicatorView extends RelativeLayout {
 		}
 
 		@Override
-		public void startUpdate(View arg0) {
-
+		public void startUpdate(ViewGroup arg0) {
 		}
 
 		@Override
-		public void finishUpdate(View arg0) {
-
+		public void finishUpdate(ViewGroup arg0) {
 		}
 	}
-
 }
 
 class ScrollIndicateHandler extends Handler {
@@ -446,7 +442,6 @@ class ScrollIndicateHandler extends Handler {
 
 	public ScrollIndicateHandler(ImageIndicatorView scrollIndicateView) {
 		this.scrollIndicateView = scrollIndicateView;
-
 	}
 
 	@Override

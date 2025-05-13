@@ -19,13 +19,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.msystemlib.base.BaseActivity;
-import com.msystemlib.img.ImgLoad;
 import com.msystemlib.utils.FileUtils;
 import com.msystemlib.utils.LogUtils;
 import com.msystemlib.utils.ThreadUtils;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.PauseOnScrollListener;
-import com.pow.api.cls.RfidPower.PDATYPE;
 import com.publish.monitorsystem.R;
 import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.bean.EqptBean.Eqpt;
@@ -56,6 +52,9 @@ import butterknife.InjectView;
 
 import static com.publish.monitorsystem.R.layout.activity_eqptread;
 
+import com.publish.monitorsystem.utils.ImageUtils;
+import android.widget.AbsListView;
+
 public class EqptReadActivity extends BaseActivity {
 
 
@@ -77,7 +76,7 @@ public class EqptReadActivity extends BaseActivity {
 	ListView listView;
 	private Timer mTimer;
 	private TimerTask mTimerTask;
-	private ImageLoader imageLoader;
+	private ImageUtils imageUtils = ImageUtils.getInstance();
 	private EqptDao eqptDao;
 	Map<String, TAGINFO> Devaddrs = new LinkedHashMap<String, TAGINFO>();// 有序
 	private SoundPool soundPool;
@@ -175,7 +174,7 @@ public class EqptReadActivity extends BaseActivity {
 				if (myapp.ThreadMODE == 0)
 					handler.removeCallbacks(runnable);
 
-				if (myapp.Rpower.GetType() == PDATYPE.SCAN_ALPS_ANDROID_CUIUS2) {
+				if (false) {
 					try {
 						Thread.sleep(500);
 					} catch (InterruptedException e) {
@@ -201,21 +200,13 @@ public class EqptReadActivity extends BaseActivity {
 	@Override
 	public void initView(View view) {
 		ButterKnife.inject(this);
-		tv_title.setText("读取");
-	}
-
-	@Override
-	public void doBusiness(Context mContext) {
-		//声音池初始化
-		soundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
-		soundPool.load(this, R.raw.beep, 1);
+		tv_title.setText("设备读取");
 		//变量初始化
 		Application app = getApplication();
 		myapp = (SysApplication) app;
 		runnable = new Runnable_Reader(myapp);
 		readRFID = new ReadRFID(myapp);
 		myapp.Rparams = myapp.new ReaderParams();
-		imageLoader = ImgLoad.initImageLoader(EqptReadActivity.this);
 		//数据处理层初始化
 		eqptDao = EqptDao.getInstance(this);
 		ThreadUtils.runInBackground(new Runnable() {
@@ -329,12 +320,22 @@ public class EqptReadActivity extends BaseActivity {
 
 						vh.tv_LCCode.setText(MyUtils.ToDBC("浪潮编号：\n" + eqpt.LangChaoBianHao));
 						vh.tv_contractName.setText(MyUtils.ToDBC("合同名称：\n" + eqpt.ContractName));
-						imageLoader.displayImage("file://" + FileUtils.gainSDCardPath() + "/IMGcache/" + eqpt.ImageName, vh.iv);
+						imageUtils.loadImage(getApplicationContext(), "file://" + FileUtils.gainSDCardPath() + "/IMGcache/" + eqpt.ImageName, vh.iv);
 						return view;
 					}
 				};
 				listView.setAdapter(adapter);
-				listView.setOnScrollListener(new PauseOnScrollListener(imageLoader, true, true)); // 设置滚动时不加载图片
+				listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+					@Override
+					public void onScrollStateChanged(AbsListView view, int scrollState) {
+						// Handle scroll state changes
+					}
+
+					@Override
+					public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+						// Handle scroll
+					}
+				});
 			}
 		}else if("3".equals(SysApplication.gainData(Const.TYPEID).toString().trim())){
 			//typeId为3时为档案系统
@@ -528,5 +529,10 @@ public class EqptReadActivity extends BaseActivity {
 		}
 		return super.onKeyDown(keyCode, event);
 
+	}
+
+	@Override
+	public void doBusiness(Context context) {
+		// TODO: Реализуйте бизнес-логику, если нужно
 	}
 }

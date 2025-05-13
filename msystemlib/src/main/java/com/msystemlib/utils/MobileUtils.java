@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
+import android.annotation.SuppressLint;
 
 public class MobileUtils {
 	/**
@@ -20,7 +21,10 @@ public class MobileUtils {
 
 	/**
 	 * 得到手机IMEI
+	 * Note: getDeviceId() requires READ_PRIVILEGED_PHONE_STATE, which is only available to system apps.
+	 * For regular apps, this will not work on Android 10+.
 	 */
+	@SuppressLint("MissingPermission")
 	public static String getIMEI(Context context) {
 		String result = "";
 		TelephonyManager tm = (TelephonyManager) context

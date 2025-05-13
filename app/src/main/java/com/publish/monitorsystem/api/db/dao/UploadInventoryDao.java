@@ -101,12 +101,18 @@ public class UploadInventoryDao{
 			Cursor cursor = database.rawQuery(sql, null);
 			while (cursor.moveToNext()) {
 				uploadInventory = new UploadInventory();
-				uploadInventory.InventoryID = cursor.getString(cursor
-						.getColumnIndex("InventoryID"));
-				uploadInventory.ParentPlanID = cursor.getString(cursor
-						.getColumnIndex("ParentPlanID"));
-				uploadInventory.UploadTime = cursor.getString(cursor
-						.getColumnIndex("UploadTime"));
+				int idxInventoryID = cursor.getColumnIndex("InventoryID");
+				if (idxInventoryID != -1) {
+					uploadInventory.InventoryID = cursor.getString(idxInventoryID);
+				}
+				int idxParentPlanID = cursor.getColumnIndex("ParentPlanID");
+				if (idxParentPlanID != -1) {
+					uploadInventory.ParentPlanID = cursor.getString(idxParentPlanID);
+				}
+				int idxUploadTime = cursor.getColumnIndex("UploadTime");
+				if (idxUploadTime != -1) {
+					uploadInventory.UploadTime = cursor.getString(idxUploadTime);
+				}
 				list.add(uploadInventory);
 				uploadInventory = null;
 			}

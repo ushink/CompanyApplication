@@ -1,6 +1,8 @@
 package com.publish.monitorsystem.app.fragment;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -9,13 +11,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-import org.ksoap2.serialization.SoapObject;
+import org.json.JSONObject;
 
 import android.app.Application;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
@@ -30,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -72,9 +76,14 @@ import com.publish.monitorsystem.api.utils.MyUtils;
 import com.publish.monitorsystem.app.LocalActivity;
 import com.publish.monitorsystem.application.SysApplication;
 import com.publish.monitorsystem.view.MyProgressBar;
+import com.publish.monitorsystem.utils.SoapUtils;
+import org.json.JSONObject;
 
-import net.tsz.afinal.FinalHttp;
-import net.tsz.afinal.http.AjaxCallBack;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class UpdateFragment extends BaseFragment implements OnItemClickListener {
 
@@ -90,7 +99,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	private String[] names;
 	private int [] imageIds;
 	private int i;
-	private FinalHttp fh = new FinalHttp();
+	private OkHttpClient httpClient = new OkHttpClient();
 	
 	private EqptDao eqptDao;
 	private InventoryDao inventoryDao;
@@ -202,56 +211,20 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	private List<InventoryEqpt> inventoryEqptList;
 	private CustomDialog customDialog;
 
+	private View view;
+
 	@Override
 	public View initView() {
-		View view = View.inflate(getActivity(), R.layout.fragment_update, null);
-		ButterKnife.inject(this,view);
+		View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_update, null);
+		ButterKnife.inject(this, view);
 		tvTitle.setText("更新数据");
 		tvTestconn.setText("测试连接中...");
-		
-		typeID = SysApplication.gainData(Const.TYPEID).toString().trim();
-		if("1".equals(typeID) || "2".equals(typeID)){
-			//设备及营具系统
-			names = new String[]{"更新最新信息","获取盘点计划","上传最新信息"};
-			imageIds = new int[]{R.drawable.getdevice,R.drawable.getcheck,R.drawable.upload };
-		}else if("3".equals(typeID)){
-			//档案系统
-			names  = new String[]{"更新最新信息","获取盘点计划","上传最新信息",
-					"获取查找计划"};
-//			,"获取核检计划"  ,R.drawable.getagain
-			imageIds = new int[]{R.drawable.getdevice,R.drawable.getcheck, R.drawable.upload
-					,R.drawable.getsearch};
-		}
-		
-		
-		adapter = new GirdViewAdapter(names) {
-			
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				View view = null;
-				if(convertView == null){
-					view =  View.inflate(getActivity(), R.layout.gird_item_home, null);
-				}else{
-					view = convertView;
-				}
-				
-				TextView name = (TextView) view.findViewById(R.id.tv_name_grid_item);
-				name.setText(names[position]);
-				name.setTextColor(getActivity().getResources().getColor(R.color.title));
-				
-				ImageView image = (ImageView) view.findViewById(R.id.iv_icon_gird_item);
-				image.setBackgroundResource(imageIds[position]);
-				return view;
-			}
-		};
-		gvItems.setAdapter(adapter);
-		gvItems.setOnItemClickListener(this);
-		
 		return view;
 	}
 
 	@Override
 	public void initData() {
+		// TODO: implement if needed
 		//数据处理层初始化
 		eqptDao = EqptDao.getInstance(getActivity());
 		inventoryDao = InventoryDao.getInstance(getActivity());
@@ -310,13 +283,14 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 						downloadDialog.show();
 						properties = new HashMap<String, String>();
 						properties.put("TypeID", SysApplication.gainData(Const.TYPEID).toString().trim());
-						HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETEQUIPMENTTAGNUMBER, properties, new IWebServiceCallBack() {
+						// TODO: Сформировать soapEnvelope из properties
+						SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 							@Override
-							public void onSucced(SoapObject result) {
+							public void onSuccess(JSONObject result) {
 								if(result != null){
 									//联网成功后删除所有之前缓存信息
 									eqptDao.deleteAllEqpt();
-									String string = result.getProperty(0).toString();
+									String string = result.optString("Result");
 									if("NULL".equals(string)){
 										downloadDialog.dismiss();
 										return;
@@ -342,7 +316,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 							}
 
 							@Override
-							public void onFailure(String result) {
+							public void onFailure(String error) {
 								ToastUtils.showToast(getActivity(), "联网失败");
 								downloadDialog.dismiss();
 							}
@@ -384,10 +358,11 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 						properties = new HashMap<String, String>();
 						properties.put("TypeID", SysApplication.gainData(Const.TYPEID).toString().trim());
 						properties.put("FunctionID", 1+"");
-						HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETINVENTORYPLAN, properties, new IWebServiceCallBack() {
+						// TODO: Сформировать soapEnvelope из properties
+						SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 
 							@Override
-							public void onSucced(SoapObject result) {
+							public void onSuccess(JSONObject result) {
 
 								if(result != null){
 									//联网成功后删除所有之前缓存信息
@@ -398,7 +373,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 										inventoryEqptDao.deleteInventoryEqptByParentPlan(inventoryDao.getInventory(SysApplication.gainData(Const.TYPEID).toString().trim(),1 + "").ParentPlanID);
 									}
 									inventoryDao.deleteAllInventory(1);
-									String string = result.getProperty(0).toString();
+									String string = result.optString("Result");
 									if(!"404".equals(string) && !"405".equals(string)){
 										getBuildingAndRoom(string + "&" + 1);
 									}else{
@@ -409,7 +384,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 							}
 
 							@Override
-							public void onFailure(String result) {
+							public void onFailure(String error) {
 								ToastUtils.showToast(getActivity(), "联网失败");
 								downloadDialog.dismiss();
 							}
@@ -445,12 +420,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 				properties = new HashMap<String, String>();
 				properties.put("strJson", jsonArray);
 				tvPro.setText("已上传 ：0/ 共"+ size +"条");
-				HttpConn.callService(Const.URL, Const.NAMESPACE, Const.UPLOADINVENTORY, properties, new IWebServiceCallBack() {
+				// TODO: Сформировать soapEnvelope из properties
+				SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 					
 					@Override
-					public void onSucced(SoapObject result) {
+					public void onSuccess(JSONObject result) {
 						if(result != null){
-							String string = result.getProperty(0).toString();
+							String string = result.optString("Result");
 							if("true".equals(string) ){
 								getInventoryInfo();
 							}
@@ -458,7 +434,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 					}
 					
 					@Override
-					public void onFailure(String result) {
+					public void onFailure(String error) {
 						ToastUtils.showToast(getActivity(), "联网失败");
 						downloadDialog.dismiss();
 					}
@@ -473,17 +449,18 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			properties = new HashMap<String, String>();
 			properties.put("TypeID", SysApplication.gainData(Const.TYPEID).toString().trim());
 			properties.put("FunctionID", 2+"");
-			HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETINVENTORYPLAN, properties, new IWebServiceCallBack() {
+			// TODO: Сформировать soapEnvelope из properties
+			SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 
 				@Override
-				public void onSucced(SoapObject result) {
+				public void onSuccess(JSONObject result) {
 
 					if(result != null){
 						//联网成功后删除所有之前缓存信息
 						buildingDao.deleteAllBuilding();
 						roomDao.deleteAllRoom();
 						myapp.Devaddrs.clear();
-						String string = result.getProperty(0).toString();
+						String string = result.optString("Result");
 						if(!"404".equals(string) && !"405".equals(string)){
 							getBuildingAndRoom(string +"&" +2);
 						}else{
@@ -494,7 +471,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 				}
 
 				@Override
-				public void onFailure(String result) {
+				public void onFailure(String error) {
 					ToastUtils.showToast(getActivity(), "联网失败");
 					downloadDialog.dismiss();
 				}
@@ -551,12 +528,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 		String json = FormatJsonUtils.formatJson(pageInventoryEqpt);
 		LogUtils.d("ckj",json);
 		properties.put("strJson", json);
-		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.UPLOADINVENTORYINFO, properties, new IWebServiceCallBack() {
+		// TODO: Сформировать soapEnvelope из properties
+		SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 
 			@Override
-			public void onSucced(SoapObject result) {
+			public void onSuccess(JSONObject result) {
 				if(result != null){
-					String string = result.getProperty(0).toString();
+					String string = result.optString("Result");
                     LogUtils.d("ckj",string);
 					if("true".equals(string) ){
 						pro.setProgress(count*100/size);
@@ -583,7 +561,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			}
 
 			@Override
-			public void onFailure(String result) {
+			public void onFailure(String error) {
 				ToastUtils.showToast(getActivity(), "联网失败");
 				downloadDialog.dismiss();
 			}
@@ -595,16 +573,18 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	 * @param str
 	 */
 	protected void getBuildingAndRoom(final String str) {
-		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETBUILDINGLIST, null, new IWebServiceCallBack() {
+		// TODO: Сформировать soapEnvelope из properties
+		SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 			@Override
-			public void onSucced(SoapObject result) {
+			public void onSuccess(JSONObject result) {
 				if(result != null){
-					final String buildStr = result.getProperty(0).toString();
-					HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETROOMLIST, null, new IWebServiceCallBack() {
+					final String buildStr = result.optString("Result");
+					// TODO: Сформировать soapEnvelope из properties
+					SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 						@Override
-						public void onSucced(SoapObject result) {
+						public void onSuccess(JSONObject result) {
 							if(result != null){
-								final String roomStr = result.getProperty(0).toString();
+								final String roomStr = result.optString("Result");
 								ThreadUtils.runInBackground(new Runnable() {
 
 									@Override
@@ -616,7 +596,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 						}
 						
 						@Override
-						public void onFailure(String result) {
+						public void onFailure(String error) {
 							ToastUtils.showToast(getActivity(), "联网失败");
 						}
 					});
@@ -624,7 +604,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			}
 			
 			@Override
-			public void onFailure(String result) {
+			public void onFailure(String error) {
 				ToastUtils.showToast(getActivity(), "联网失败");
 			}
 		});
@@ -665,12 +645,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	protected void getInventoryEqptNum(){
 		properties1 = new HashMap<String, String>();
 		properties1.put("ParentPlanID", inventoryDao.getInventory(SysApplication.gainData(Const.TYPEID).toString().trim(),FunctionID).ParentPlanID);
-		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETINVENTORYEQPTNUM, properties1 , new IWebServiceCallBack() {
+		// TODO: Сформировать soapEnvelope из properties1
+		SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 			
 			@Override
-			public void onSucced(SoapObject result) {
+			public void onSuccess(JSONObject result) {
 				if(result != null){
-					String string = result.getProperty(0).toString();
+					String string = result.optString("Result");
 					if(null != string && !"".equals(string)){
 						inventoryEqutSize = Integer.parseInt(string);
 					}
@@ -684,7 +665,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			}
 			
 			@Override
-			public void onFailure(String result) {
+			public void onFailure(String error) {
 				
 			}
 		});
@@ -695,12 +676,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	 * @param getInventoryData
 	 */
 	protected void getInventoryData(String getInventoryData) {
-		HttpConn.callService(Const.URL, Const.NAMESPACE, getInventoryData, properties1 , new IWebServiceCallBack() {
+		// TODO: Сформировать soapEnvelope из properties1
+		SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 			
 			@Override
-			public void onSucced(SoapObject result) {
+			public void onSuccess(JSONObject result) {
 				if(result != null){
-					jsonString = result.getProperty(0).toString();
+					jsonString = result.optString("Result");
 					ThreadUtils.runInBackground(new Runnable() {
 
 						@Override
@@ -713,7 +695,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			}
 			
 			@Override
-			public void onFailure(String result) {
+			public void onFailure(String error) {
 				ToastUtils.showToast(getActivity(), "联网失败");
 				downloadDialog.dismiss();
 			}
@@ -758,12 +740,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	 * @param getequipmenttaginfo
 	 */
 	protected void getData(String getequipmenttaginfo) {
-		HttpConn.callService(Const.URL, Const.NAMESPACE, getequipmenttaginfo, properties , new IWebServiceCallBack() {
+		// TODO: Сформировать soapEnvelope из properties
+		SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 			
 			@Override
-			public void onSucced(SoapObject result) {
+			public void onSuccess(JSONObject result) {
 				if(result != null){
-					jsonString = result.getProperty(0).toString();
+					jsonString = result.optString("Result");
 					ThreadUtils.runInBackground(new Runnable() {
 
 						@Override
@@ -775,7 +758,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			}
 			
 			@Override
-			public void onFailure(String result) {
+			public void onFailure(String error) {
 				ToastUtils.showToast(getActivity(), "联网失败");
 				downloadDialog.dismiss();
 			}
@@ -876,14 +859,10 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 					}
 				}else{
 
-					fh.download(downURL, FileUtils.gainSDCardPath() +"/IMGcache/" + name,new AjaxCallBack<File>() {
+					downloadFile(downURL, FileUtils.gainSDCardPath() +"/IMGcache/" + name, new DownloadCallback() {
 
 						@Override
-						public void onLoading(long count, long current) {
-
-						}
-						@Override
-						public void onSuccess(File t) {
+						public void onSuccess(File file) {
 							System.out.println(downURL);
 							mCount = 0;
 							addCount ++;
@@ -900,7 +879,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 
 
 						@Override
-						public void onFailure (Throwable t, String strMsg) {
+						public void onFailure(String error) {
 							System.out.println("onFailure:" + mCount);
 							mCount++;
 							if(mCount == 2){
@@ -950,7 +929,7 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
         pro.setMax(100);
         Dialog downloadDialog = new Dialog(context, R.style.loading_dialog);// 创建自定义样式dialog  
   
-        downloadDialog.setCancelable(false);// 不可以用“返回键”取消  
+        downloadDialog.setCancelable(false);// 不可以用"返回键"取消  
         downloadDialog.setContentView(layout, new LinearLayout.LayoutParams(  
                 LinearLayout.LayoutParams.MATCH_PARENT,  
                 LinearLayout.LayoutParams.MATCH_PARENT));// 设置布局  
@@ -962,12 +941,13 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 	 * 测试连接
 	 */
 	public void TestConn(){
-		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.TESTCONNECT, null, new IWebServiceCallBack() {
+		// TODO: Сформировать soapEnvelope из properties
+		SoapUtils.getInstance().callSoapService(Const.URL, Const.NAMESPACE, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 			
 			@Override
-			public void onSucced(SoapObject result) {
+			public void onSuccess(JSONObject result) {
 				if(result != null){
-					final String string = result.getProperty(0).toString();
+					final String string = result.optString("Result");
 					if("true".equals(string)){
 						tvTestconn.setText("连接成功");
 						tvTestconn.setTextColor(Color.GREEN);
@@ -979,10 +959,46 @@ public class UpdateFragment extends BaseFragment implements OnItemClickListener 
 			}
 			
 			@Override
-			public void onFailure(String result) {
+			public void onFailure(String error) {
 				tvTestconn.setText("连接失败");
 				tvTestconn.setTextColor(Color.RED);
 			}
 		});
+	}
+
+	private void downloadFile(String url, String destinationPath, final DownloadCallback callback) {
+		Request request = new Request.Builder()
+				.url(url)
+				.build();
+
+		httpClient.newCall(request).enqueue(new Callback() {
+			@Override
+			public void onFailure(Call call, IOException e) {
+				callback.onFailure(e.getMessage());
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException {
+				if (!response.isSuccessful()) {
+					callback.onFailure("Unexpected response " + response);
+					return;
+				}
+
+				try {
+					File destinationFile = new File(destinationPath);
+					FileOutputStream fos = new FileOutputStream(destinationFile);
+					fos.write(response.body().bytes());
+					fos.close();
+					callback.onSuccess(destinationFile);
+				} catch (Exception e) {
+					callback.onFailure(e.getMessage());
+				}
+			}
+		});
+	}
+
+	interface DownloadCallback {
+		void onSuccess(File file);
+		void onFailure(String error);
 	}
 }

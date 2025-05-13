@@ -47,7 +47,7 @@ public abstract class BaseActivity extends Activity implements IBaseActivity {
 		// 无标题栏
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		// //开启沉浸式状态栏
-		 StatuesUtils.openImmerseStatasBarMode(this);
+		StatuesUtils.openImmerseStatasBarMode(this);
 		// 设置渲染视图View
 		mContextView = LayoutInflater.from(this).inflate(bindLayout(), null);
 		setContentView(mContextView);
@@ -65,7 +65,7 @@ public abstract class BaseActivity extends Activity implements IBaseActivity {
 		doBusiness(this);
 
 		// 显示VoerFlowMenu
-		displayOverflowMenu(getContext());
+		// displayOverflowMenu(getContext()); // <--- commented out
 	}
 
 	@Override
@@ -126,26 +126,6 @@ public abstract class BaseActivity extends Activity implements IBaseActivity {
 			}
 		}
 		return super.onMenuOpened(featureId, menu);
-	}
-
-	/**
-	 * 显示OverFlowMenu按钮
-	 * 
-	 * @param mContext
-	 *            上下文Context
-	 */
-	public void displayOverflowMenu(Context mContext) {
-		try {
-			ViewConfiguration config = ViewConfiguration.get(mContext);
-			Field menuKeyField = ViewConfiguration.class
-					.getDeclaredField("sHasPermanentMenuKey");
-			if (menuKeyField != null) {
-				menuKeyField.setAccessible(true);
-				menuKeyField.setBoolean(config, false);// 显示
-			}
-		} catch (Exception e) {
-			Log.e("ActionBar", e.getMessage());
-		}
 	}
 
 	/**

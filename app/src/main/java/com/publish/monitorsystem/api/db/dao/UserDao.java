@@ -88,24 +88,42 @@ public class UserDao{
 			Cursor cursor = database.rawQuery(sql, null);
 			while (cursor.moveToNext()) {
 				user = bean.new User();
-				user.UserID = cursor.getString(cursor
-						.getColumnIndex("UserID"));
-				user.TypeID = cursor.getString(cursor
-						.getColumnIndex("TypeID"));
-				user.UserName = cursor.getString(cursor
-						.getColumnIndex("UserName"));
-				user.LoginName = cursor.getString(cursor
-						.getColumnIndex("LoginName"));
-				user.UserPassword = cursor.getString(cursor
-						.getColumnIndex("UserPassword"));
-				user.UpdateTime = cursor.getString(cursor
-						.getColumnIndex("UpdateTime"));
-				user.CreateTime = cursor.getString(cursor
-						.getColumnIndex("CreateTime"));
-				user.CreateUser = cursor.getString(cursor
-						.getColumnIndex("CreateUser"));
-				user.DeleteFlag = cursor.getString(cursor
-						.getColumnIndex("DeleteFlag"));
+				int idxUserID = cursor.getColumnIndex("UserID");
+				if (idxUserID != -1) {
+					user.UserID = cursor.getString(idxUserID);
+				}
+				int idxTypeID = cursor.getColumnIndex("TypeID");
+				if (idxTypeID != -1) {
+					user.TypeID = cursor.getString(idxTypeID);
+				}
+				int idxUserName = cursor.getColumnIndex("UserName");
+				if (idxUserName != -1) {
+					user.UserName = cursor.getString(idxUserName);
+				}
+				int idxLoginName = cursor.getColumnIndex("LoginName");
+				if (idxLoginName != -1) {
+					user.LoginName = cursor.getString(idxLoginName);
+				}
+				int idxUserPassword = cursor.getColumnIndex("UserPassword");
+				if (idxUserPassword != -1) {
+					user.UserPassword = cursor.getString(idxUserPassword);
+				}
+				int idxUpdateTime = cursor.getColumnIndex("UpdateTime");
+				if (idxUpdateTime != -1) {
+					user.UpdateTime = cursor.getString(idxUpdateTime);
+				}
+				int idxCreateTime = cursor.getColumnIndex("CreateTime");
+				if (idxCreateTime != -1) {
+					user.CreateTime = cursor.getString(idxCreateTime);
+				}
+				int idxCreateUser = cursor.getColumnIndex("CreateUser");
+				if (idxCreateUser != -1) {
+					user.CreateUser = cursor.getString(idxCreateUser);
+				}
+				int idxDeleteFlag = cursor.getColumnIndex("DeleteFlag");
+				if (idxDeleteFlag != -1) {
+					user.DeleteFlag = cursor.getString(idxDeleteFlag);
+				}
 				list.add(user);
 				user = null;
 			}
@@ -150,24 +168,42 @@ public class UserDao{
 					new String[] { userNmae }, null, null, null);
 			if (cursor.moveToNext()) {
 				user = bean.new User();
-				user.UserID = cursor.getString(cursor
-						.getColumnIndex("UserID"));
-				user.TypeID = cursor.getString(cursor
-						.getColumnIndex("TypeID"));
-				user.UserName = cursor.getString(cursor
-						.getColumnIndex("UserName"));
-				user.LoginName = cursor.getString(cursor
-						.getColumnIndex("LoginName"));
-				user.UserPassword = cursor.getString(cursor
-						.getColumnIndex("UserPassword"));
-				user.UpdateTime = cursor.getString(cursor
-						.getColumnIndex("UpdateTime"));
-				user.CreateTime = cursor.getString(cursor
-						.getColumnIndex("CreateTime"));
-				user.CreateUser = cursor.getString(cursor
-						.getColumnIndex("CreateUser"));
-				user.DeleteFlag = cursor.getString(cursor
-						.getColumnIndex("DeleteFlag"));
+				int idxUserID = cursor.getColumnIndex("UserID");
+				if (idxUserID != -1) {
+					user.UserID = cursor.getString(idxUserID);
+				}
+				int idxTypeID = cursor.getColumnIndex("TypeID");
+				if (idxTypeID != -1) {
+					user.TypeID = cursor.getString(idxTypeID);
+				}
+				int idxUserName = cursor.getColumnIndex("UserName");
+				if (idxUserName != -1) {
+					user.UserName = cursor.getString(idxUserName);
+				}
+				int idxLoginName = cursor.getColumnIndex("LoginName");
+				if (idxLoginName != -1) {
+					user.LoginName = cursor.getString(idxLoginName);
+				}
+				int idxUserPassword = cursor.getColumnIndex("UserPassword");
+				if (idxUserPassword != -1) {
+					user.UserPassword = cursor.getString(idxUserPassword);
+				}
+				int idxUpdateTime = cursor.getColumnIndex("UpdateTime");
+				if (idxUpdateTime != -1) {
+					user.UpdateTime = cursor.getString(idxUpdateTime);
+				}
+				int idxCreateTime = cursor.getColumnIndex("CreateTime");
+				if (idxCreateTime != -1) {
+					user.CreateTime = cursor.getString(idxCreateTime);
+				}
+				int idxCreateUser = cursor.getColumnIndex("CreateUser");
+				if (idxCreateUser != -1) {
+					user.CreateUser = cursor.getString(idxCreateUser);
+				}
+				int idxDeleteFlag = cursor.getColumnIndex("DeleteFlag");
+				if (idxDeleteFlag != -1) {
+					user.DeleteFlag = cursor.getString(idxDeleteFlag);
+				}
 			}
 		} catch (Exception e) {
 			System.out.println("----getUserInfo-->" + e.getMessage());

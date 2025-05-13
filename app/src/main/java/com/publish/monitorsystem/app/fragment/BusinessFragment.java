@@ -1,8 +1,8 @@
 package com.publish.monitorsystem.app.fragment;
 
-import android.app.Application;
 import android.content.Intent;
-import android.os.Handler;
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -10,6 +10,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import androidx.fragment.app.Fragment;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 
@@ -17,7 +18,6 @@ import com.msystemlib.base.BaseFragment;
 import com.msystemlib.common.adapter.GirdViewAdapter;
 import com.msystemlib.utils.LogUtils;
 import com.msystemlib.utils.ThreadUtils;
-import com.msystemlib.utils.ToastUtils;
 import com.publish.monitorsystem.R;
 import com.publish.monitorsystem.api.Const;
 import com.publish.monitorsystem.api.db.dao.BuildingDao;
@@ -33,6 +33,7 @@ import com.publish.monitorsystem.app.EqptReadActivity;
 import com.publish.monitorsystem.app.InventorySelActivity;
 import com.publish.monitorsystem.app.SerachListActivity;
 import com.publish.monitorsystem.application.SysApplication;
+import com.publish.monitorsystem.utils.ToastUtils;
 
 public class BusinessFragment extends BaseFragment implements
 		OnItemClickListener {
@@ -55,47 +56,9 @@ public class BusinessFragment extends BaseFragment implements
 
 	@Override
 	public View initView() {
-		View view = View.inflate(getActivity(), R.layout.fragment_business,
-				null);
+		View view = LayoutInflater.from(getActivity()).inflate(R.layout.fragment_business, null);
 		ButterKnife.inject(this, view);
 		tvTitle.setText("业务操作");
-
-		typeID = SysApplication.gainData(Const.TYPEID).toString().trim();
-		if ("1".equals(typeID) || "2".equals(typeID)) {
-			names = new String[] { "盘点", "读取" };
-			imageIds = new int[] { R.drawable.check, R.drawable.read };
-		} else if ("3".equals(typeID)) {
-			names = new String[] { "盘点", "读取", "查找"};
-//			, "核检"  , R.drawable.again
-			imageIds = new int[] { R.drawable.check, R.drawable.read,
-					R.drawable.search };
-		}
-
-		adapter = new GirdViewAdapter(names) {
-
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent) {
-				View view = null;
-				if (convertView == null) {
-					view = View.inflate(getActivity(), R.layout.gird_item_home,
-							null);
-				} else {
-					view = convertView;
-				}
-
-				TextView name = (TextView) view
-						.findViewById(R.id.tv_name_grid_item);
-				name.setText(names[position]);
-				name.setTextColor(getActivity().getResources().getColor(
-						R.color.title));
-
-				ImageView image = (ImageView) view
-						.findViewById(R.id.iv_icon_gird_item);
-				image.setBackgroundResource(imageIds[position]);
-				return view;
-			}
-		};
-		gvItems.setAdapter(adapter);
 		gvItems.setOnItemClickListener(this);
 		return view;
 	}

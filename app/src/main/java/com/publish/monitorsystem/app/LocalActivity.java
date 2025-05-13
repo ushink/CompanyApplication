@@ -3,8 +3,6 @@ package com.publish.monitorsystem.app;
 import java.util.HashMap;
 import java.util.List;
 
-import org.ksoap2.serialization.SoapObject;
-
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -36,6 +34,8 @@ import com.publish.monitorsystem.api.bean.UserBean.User;
 import com.publish.monitorsystem.api.db.dao.UserDao;
 import com.publish.monitorsystem.api.utils.DialogUtils;
 import com.publish.monitorsystem.view.MyProgressBar;
+import com.publish.monitorsystem.utils.SoapUtils;
+import org.json.JSONObject;
 
 public class LocalActivity extends BaseActivity implements OnClickListener {
 
@@ -163,12 +163,12 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 			downloadDialog.show();
 			HashMap<String, String> properties = new HashMap<String, String>();
 			properties.put("IMEI", mobileIMEI);
-			HttpConn.callService(Const.URL, Const.NAMESPACE, Const.GETLOGINUSERLIST, properties , new IWebServiceCallBack() {
-				
+			// TODO: Сформировать soapEnvelope из properties
+			SoapUtils.getInstance().callSoapService(Const.URL, Const.GETLOGINUSERLIST, "<soapEnvelope>", new SoapUtils.SoapCallback() {
 				@Override
-				public void onSucced(SoapObject result) {
+				public void onSuccess(JSONObject result) {
 					if(result != null){
-						final String string = result.getProperty(0).toString();
+						final String string = result.optString("result");
 						LogUtils.d("ckj", string);
 						if(!"404".equals(string)){
 							ThreadUtils.runInBackground(new Runnable() {
@@ -190,7 +190,7 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 				}
 				
 				@Override
-				public void onFailure(String result) {
+				public void onFailure(String error) {
 					ToastUtils.showToast(LocalActivity.this, "联网失败");
 					downloadDialog.dismiss();
 				}
@@ -300,7 +300,7 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
         pro.setMax(100);
         Dialog downloadDialog = new Dialog(context, R.style.loading_dialog);// 创建自定义样式dialog  
   
-        downloadDialog.setCancelable(false);// 不可以用“返回键”取消  
+        downloadDialog.setCancelable(false);// 不可以用"返回键"取消  
         downloadDialog.setContentView(layout, new LinearLayout.LayoutParams(  
                 LinearLayout.LayoutParams.MATCH_PARENT,  
                 LinearLayout.LayoutParams.MATCH_PARENT));// 设置布局  
@@ -312,12 +312,12 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 	 * 测试连接
 	 */
 	public void TestConn(){
-		HttpConn.callService(Const.URL, Const.NAMESPACE, Const.TESTCONNECT, null, new IWebServiceCallBack() {
+		SoapUtils.getInstance().callSoapService(Const.URL, Const.TESTCONNECT, null, new SoapUtils.SoapCallback() {
 			
 			@Override
-			public void onSucced(SoapObject result) {
+			public void onSuccess(JSONObject result) {
 				if(result != null){
-					final String string = result.getProperty(0).toString();
+					final String string = result.optString("result");
 					if("true".equals(string)){
 						tvTestconn.setText("连接成功");
 						tvTestconn.setTextColor(Color.GREEN);
@@ -329,7 +329,7 @@ public class LocalActivity extends BaseActivity implements OnClickListener {
 			}
 			
 			@Override
-			public void onFailure(String result) {
+			public void onFailure(String error) {
 				tvTestconn.setText("连接失败");
 				tvTestconn.setTextColor(Color.RED);
 			}
