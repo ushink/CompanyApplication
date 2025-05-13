@@ -70,7 +70,7 @@ public class LoginActivity extends BaseActivity{
 
                 if(Const.ADMIN.equalsIgnoreCase(userName) && Const.ADMINPWD.equals(pwd)){
                     LogUtils.d(SysApplication.TAG,"管理员登录,时间：" + SystemClock.currentThreadTimeMillis());
-					jump2Activity(LoginActivity.this,LocalActivity.class, null, false);
+                    jump2Activity(LoginActivity.this,LocalActivity.class, null, false);
                 }else{
                     matchUser(userName,pwd);
                 }
@@ -92,7 +92,7 @@ public class LoginActivity extends BaseActivity{
         boolean avaiLogin = userDao.avaiLogin(userName, pwd);
         if(avaiLogin){
             LogUtils.d(SysApplication.TAG,userName + "用户登录,时间：" + SystemClock.currentThreadTimeMillis());
-			jump2Activity(LoginActivity.this, MainActivity.class, null , false);
+            jump2Activity(LoginActivity.this, MainActivity.class, null , false);
         }else{
             loadingDialog.dismiss();
             ToastUtils.showToast(LoginActivity.this, "账号或者密码错误");
@@ -101,15 +101,19 @@ public class LoginActivity extends BaseActivity{
 
     @Override
     public void doBusiness(Context mContext) {
-        etLoginName.setText(SPUtils.getString(this, Const.USERNAME, ""));
-        etPassword.setText(SPUtils.getString(this, Const.PASSWORD, ""));
+        if (etLoginName != null && etPassword != null) {
+            etLoginName.setText(SPUtils.getString(this, Const.USERNAME, ""));
+            etPassword.setText(SPUtils.getString(this, Const.PASSWORD, ""));
+        }
         userDao = UserDao.getInstance(mContext);
     }
 
     @Override
     public void resume() {
-        etLoginName.setText(SPUtils.getString(this, Const.USERNAME, ""));
-        etPassword.setText(SPUtils.getString(this, Const.PASSWORD, ""));
+        if (etLoginName != null && etPassword != null) {
+            etLoginName.setText(SPUtils.getString(this, Const.USERNAME, ""));
+            etPassword.setText(SPUtils.getString(this, Const.PASSWORD, ""));
+        }
         if(loadingDialog != null){
             loadingDialog.dismiss();
         }
@@ -117,7 +121,9 @@ public class LoginActivity extends BaseActivity{
 
     @Override
     public void destroy() {
+        ButterKnife.reset(this);
     }
+    
     private long exitTime = 0;
     private Dialog loadingDialog;
 
@@ -136,5 +142,4 @@ public class LoginActivity extends BaseActivity{
         }
         return super.onKeyDown(keyCode, event);
     }
-
 }
